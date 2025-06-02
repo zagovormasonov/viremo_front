@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSession } from '@supabase/auth-helpers-react';
 import { supabase } from '../supabase';
 import { Link } from 'react-router-dom';
+import './CardDetails'; // Импорт стилей
 
 const Home = () => {
   const session = useSession();
