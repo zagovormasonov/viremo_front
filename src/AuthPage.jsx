@@ -2,8 +2,16 @@ import { supabase } from './supabase';
 
 export default function AuthPage() {
   const handleSignInWithGoogle = async () => {
-    await supabase.auth.signInWithOAuth({ provider: 'google' });
-  };
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        queryParams: {
+          prompt: 'select_account',
+        },
+      },
+    });
+};
+
 
   return (
     <div style={{
