@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabase } from './supabaseClient';
+import { supabase } from './supabase';
 
 function PsychologistDashboard() {
   const [clients, setClients] = useState([]);

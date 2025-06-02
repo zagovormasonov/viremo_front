@@ -1,5 +1,5 @@
 import React from 'react';
-import { supabase } from './supabaseClient';
+import { supabase } from './supabase';
 
 function RoleSelection({ userId, onSelect }) {
   const selectRole = async (role) => {
