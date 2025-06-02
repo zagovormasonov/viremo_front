@@ -8,6 +8,7 @@ function App() {
   const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Отслеживание изменений сессии
   useEffect(() => {
     const {
       data: { subscription },
@@ -16,7 +17,7 @@ function App() {
       setUser(session?.user || null);
     });
 
-    // Проверка текущей сессии
+    // Проверка текущей сессии при первом запуске
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user || null);
@@ -25,9 +26,11 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Определение роли
   useEffect(() => {
     const fetchRole = async () => {
-      if (!user) {
+      if (!user?.id) {
+        console.log("Нет user.id — выход");
         setLoading(false);
         return;
       }
@@ -40,16 +43,30 @@ function App() {
         .eq('id', user.id)
         .single();
 
+      if (error && error.code !== 'PGRST116') {
+        console.error("Ошибка при получении роли:", error.message);
+        setLoading(false);
+        return;
+      }
+
       if (data?.role) {
+        console.log("Роль найдена:", data.role);
         setRole(data.role);
       } else {
         const email = user.email;
         const newRole = email.endsWith('@viremo.com') ? 'psychologist' : 'client';
 
-        await supabase
+        const { error: upsertError } = await supabase
           .from('profiles')
           .upsert({ id: user.id, email, role: newRole });
 
+        if (upsertError) {
+          console.error("Ошибка при upsert:", upsertError.message);
+          setLoading(false);
+          return;
+        }
+
+        console.log("Роль сохранена:", newRole);
         setRole(newRole);
       }
 
@@ -69,7 +86,6 @@ function App() {
   };
 
   if (loading) return <p>Загрузка...</p>;
-
   if (!session) return <AuthPage />;
 
   if (role === 'psychologist') {
