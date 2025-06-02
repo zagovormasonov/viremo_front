@@ -102,61 +102,47 @@ const Home = () => {
   }
 
   return (
-    <div style={styles.container}>
+    <div style={{ padding: 20, maxWidth: 800, margin: '0 auto' }}>
       {loading && (
         <div style={styles.loaderOverlay}>
           <div style={styles.spinner}></div>
         </div>
       )}
-      <GlobalStyles />
 
+      <h2>Создание CBT-карточки</h2>
       <form onSubmit={handleSubmit} style={styles.form}>
-        <h2 style={styles.title}>Создание CBT-карточки</h2>
-
-        <div style={styles.field}>
-          <label>Ситуация</label>
-          <textarea
-            value={situation}
-            onChange={(e) => setSituation(e.target.value)}
-            required
-            style={styles.textarea}
-          />
-        </div>
-
-        <div style={styles.field}>
-          <label>Мысли</label>
-          <textarea
-            value={thoughts}
-            onChange={(e) => setThoughts(e.target.value)}
-            required
-            style={styles.textarea}
-          />
-        </div>
-
-        <div style={styles.field}>
-          <label>Эмоции</label>
-          <textarea
-            value={emotions}
-            onChange={(e) => setEmotions(e.target.value)}
-            required
-            style={styles.textarea}
-          />
-        </div>
-
-        <div style={styles.field}>
-          <label>Поведение</label>
-          <textarea
-            value={behavior}
-            onChange={(e) => setBehavior(e.target.value)}
-            required
-            style={styles.textarea}
-          />
-        </div>
-
-        <button type="submit" style={styles.button} disabled={loading}>
-          {loading ? 'Генерация...' : 'Сгенерировать упражнения'}
+        <textarea
+          placeholder="Ситуация"
+          value={situation}
+          onChange={(e) => setSituation(e.target.value)}
+          required
+          style={styles.textarea}
+        />
+        <textarea
+          placeholder="Мысли"
+          value={thoughts}
+          onChange={(e) => setThoughts(e.target.value)}
+          required
+          style={styles.textarea}
+        />
+        <textarea
+          placeholder="Эмоции"
+          value={emotions}
+          onChange={(e) => setEmotions(e.target.value)}
+          required
+          style={styles.textarea}
+        />
+        <textarea
+          placeholder="Поведение"
+          value={behavior}
+          onChange={(e) => setBehavior(e.target.value)}
+          required
+          style={styles.textarea}
+        />
+        <button type="submit" style={styles.button}>
+          Сгенерировать упражнения
         </button>
-        {error && <p style={styles.error}>{error}</p>}
+        {error && <p style={{ color: 'red' }}>{error}</p>}
       </form>
 
       {exercises.length > 0 && (
@@ -190,122 +176,87 @@ const Home = () => {
             <p><strong>Эмоции:</strong> {card.emotions}</p>
             <p><strong>Поведение:</strong> {card.behavior}</p>
             <Link to={`/card/${card.id}`}>
-              <button style={styles.openButton}>Открыть</button>
+              <button style={{ marginRight: 10 }}>Открыть</button>
             </Link>
             <button
               onClick={() => handleDelete(card.id)}
-              style={styles.deleteButton}
+              style={{ backgroundColor: '#f44336', color: 'white' }}
             >
               Удалить
             </button>
           </div>
         ))}
       </div>
+
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 };
 
 const styles = {
-  container: {
-    padding: 20,
-    maxWidth: 800,
-    margin: '0 auto',
-    color: 'white',
-  },
   form: {
-    padding: 20,
-    borderRadius: 20,
-  },
-  title: {
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  field: {
-    marginBottom: 15,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '15px',
+    marginBottom: '30px',
   },
   textarea: {
-    width: '95%',
-    minHeight: 60,
-    padding: 10,
-    borderRadius: 5,
+    width: '100%',
+    padding: '12px',
+    borderRadius: '8px',
     border: '1px solid #ccc',
-    fontSize: 16,
+    fontSize: '16px',
     resize: 'vertical',
+    minHeight: '80px',
   },
   button: {
-    width: '100%',
-    padding: 10,
+    padding: '12px 20px',
+    fontSize: '16px',
+    borderRadius: '8px',
     backgroundColor: '#4caf50',
     color: 'white',
-    fontSize: 16,
     border: 'none',
-    borderRadius: 5,
     cursor: 'pointer',
   },
-  error: {
-    color: 'red',
-    marginTop: 10,
-    textAlign: 'center',
-  },
   exerciseCard: {
-    backgroundColor: '#3b3b3b',
+    border: '1px solid #ccc',
     padding: 15,
     borderRadius: 10,
     marginBottom: 15,
+    backgroundColor: '#f9f9f9',
   },
   card: {
     padding: 20,
     marginBottom: 10,
     borderRadius: 20,
     backgroundColor: 'rgb(51 50 50)',
-  },
-  openButton: {
-    marginRight: 10,
-    padding: '8px 12px',
-    borderRadius: 5,
-    border: 'none',
-    backgroundColor: '#2196f3',
     color: 'white',
-    cursor: 'pointer',
   },
-  deleteButton: {
-    padding: '8px 12px',
-    borderRadius: 5,
-    border: 'none',
-    backgroundColor: '#f44336',
-    color: 'white',
-    cursor: 'pointer',
+  loaderOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100vw',
+    height: '100vh',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    zIndex: 9999,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-    loaderOverlay: {
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100vw',
-        height: '100vh',
-        backgroundColor: 'rgba(0, 0, 0, 0.6)',
-        zIndex: 9999,
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-
-    spinner: {
-        width: '48px',
-        height: '48px',
-        border: '5px solid rgba(255, 255, 255, 0.2)',
-        borderTop: '5px solid white',
-        borderRadius: '50%',
-        animation: 'spin 1s linear infinite',
-    },
+  spinner: {
+    width: '60px',
+    height: '60px',
+    border: '6px solid rgba(255, 255, 255, 0.3)',
+    borderTop: '6px solid white',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite',
+  },
 };
-
-const GlobalStyles = () => (
-  <style>{`
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  `}</style>
-);
 
 export default Home;
