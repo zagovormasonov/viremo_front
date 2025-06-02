@@ -39,7 +39,7 @@ const CardDetails = () => {
         <div style={{ marginTop: 30 }}>
           <h3>Упражнения</h3>
           {card.exercises.map((ex, index) => (
-            <div key={index} style={{ padding: 40, marginBottom: 10, borderRadius: 20, backgroundColor: '#f9f9f9' }}>
+            <div key={index} style={{ padding: 40, marginBottom: 10, borderRadius: 20, backgroundColor: 'rgb(51 50 50)' }}>
               <h4>{ex.title}</h4>
               <p><strong>Время:</strong> {ex.duration}</p>
               <p><strong>Описание:</strong> {ex.description}</p>
