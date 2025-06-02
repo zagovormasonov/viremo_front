@@ -1,6 +1,12 @@
 import React, { useState } from "react";
+import { supabase } from "../supabase";
+import { useSession } from "@supabase/auth-helpers-react";
+import { useNavigate } from "react-router-dom";
 
 const CreateCard = () => {
+  const session = useSession();
+  const navigate = useNavigate();
+
   const [situation, setSituation] = useState("");
   const [thoughts, setThoughts] = useState("");
   const [emotions, setEmotions] = useState("");
@@ -28,8 +34,27 @@ const CreateCard = () => {
       const data = await response.json();
 
       if (response.ok) {
-        setExercises(data.result); // <- если result — это массив упражнений
+        setExercises(data.result);
         setError("");
+
+        // Сохраняем карточку в Supabase
+        const { error: insertError } = await supabase.from("cards").insert([
+          {
+            user_id: session.user.id,
+            situation,
+            thoughts,
+            emotions,
+            behavior,
+            result: JSON.stringify(data.result), // сохраняем результат как строку
+          },
+        ]);
+
+        if (insertError) {
+          console.error("Ошибка при сохранении карточки:", insertError.message);
+        } else {
+          console.log("✅ Карточка успешно сохранена в Supabase");
+        }
+
       } else {
         setError(data.error || "Ошибка генерации упражнений");
       }
@@ -39,10 +64,14 @@ const CreateCard = () => {
     }
   };
 
+  if (!session) {
+    return <p>Пожалуйста, войдите в аккаунт</p>;
+  }
+
   return (
-    <div>
+    <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
       <h2>Создать карточку</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
         <textarea
           placeholder="Ситуация"
           value={situation}
@@ -68,9 +97,9 @@ const CreateCard = () => {
 
       {error && <p style={{ color: "red" }}>{error}</p>}
 
-      <div>
+      <div style={{ marginTop: "20px" }}>
         {exercises.map((exercise, index) => (
-          <div key={index}>
+          <div key={index} style={{ marginBottom: "20px", padding: "10px", backgroundColor: "#f5f5f5", borderRadius: "8px" }}>
             <h3>{exercise.title}</h3>
             <p><strong>Время:</strong> {exercise.duration}</p>
             <p>{exercise.description}</p>
