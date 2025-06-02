@@ -19,18 +19,18 @@ const CreateCard = () => {
 
     try {
       // Отправка данных на FastAPI сервер для генерации упражнений
-      const response = await fetch('https://viremos.onrender.com/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        situation: situation.trim(),
-        thoughts: thoughts.trim(),
-        emotions: emotions.trim(),
-        behavior: behavior.trim(),
-      }),
-    });
+      const formData = new FormData();
+        formData.append("user_id", currentUserId); // <-- добавь user_id
+        formData.append("situation", situation);
+        formData.append("thoughts", thoughts);
+        formData.append("emotions", emotions);
+        formData.append("behavior", behavior);
+
+        const response = await fetch("https://viremos.onrender.com/", {
+          method: "POST",
+          body: formData,
+        });
+
 
 
       if (!response.ok) {
