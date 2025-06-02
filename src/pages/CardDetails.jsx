@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 // Пример с маскотом в виде изображения
 import foxMascot from '../assets/fox-mascot.gif'; // добавь свой файл в папку assets
+import Mascot from '../Mascot';
 
 const CardPage = () => {
   const { id } = useParams();
@@ -23,7 +24,7 @@ const CardPage = () => {
     <div style={styles.container}>
       {/* 🎉 Маскот-персонаж */}
       <div style={styles.mascotContainer}>
-        <img src={foxMascot} alt="Fox Mascot" style={styles.mascot} />
+        <img src={mascot} alt="Mascot" style={styles.mascot} />
       </div>
 
       {/* Данные карточки */}
