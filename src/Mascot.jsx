@@ -19,8 +19,8 @@ function Mascot() {
 
       messageTimeout = setTimeout(() => {
         setCurrentMessage('');
-      }, 3000);
-    }, 5000);
+      }, 5000);
+    }, 20000);
 
     return () => {
       clearInterval(interval);
