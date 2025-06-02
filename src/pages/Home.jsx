@@ -92,7 +92,6 @@ const styles = {
     color: 'white',
   },
   generateButton: {
-    position: 'fixed',
     bottom: 20,
     left: '50%',
     transform: 'translateX(-50%)',
