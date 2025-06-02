@@ -80,7 +80,7 @@ function ClientApp({ user, onSignOut }) {
         <Route path="/profile" element={<Profile />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/create" element={<CreateCard />} />
-        <Route path="/card/:id" element={<CardDetails />} />
+        <Route path="/card/:id" element={<CardDetail />} />
       </Routes>
       <TabBar />
     </div>
