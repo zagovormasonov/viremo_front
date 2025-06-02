@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { supabase } from "../supabase";
+import { supabase } from "./supabase";
 import { useSession } from "@supabase/auth-helpers-react";
 import { useNavigate } from "react-router-dom";
 
