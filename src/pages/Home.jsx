@@ -206,7 +206,7 @@ const styles = {
     marginBottom: '30px',
   },
   textarea: {
-    width: '100%',
+    width: '95%',
     padding: '12px',
     borderRadius: '8px',
     border: '1px solid #ccc',
