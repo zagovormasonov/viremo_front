@@ -8,8 +8,8 @@ function App() {
   const [session, setSession] = useState(null);
   const [role, setRole] = useState(null);
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true); // для ожидания fetch-а
 
-  // Слушаем сессию
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -21,29 +21,32 @@ function App() {
       if (session) setUser(session.user);
       else {
         setUser(null);
-        setRole(null); // сброс роли при выходе
+        setRole(null);
       }
     });
 
     return () => listener.subscription.unsubscribe();
   }, []);
 
-  // Загружаем роль из БД
   useEffect(() => {
     const fetchRole = async () => {
       if (!user) return;
+      setLoading(true);
       const { data, error } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', user.id)
         .single();
-      if (data?.role) setRole(data.role);
+
+      if (data?.role) {
+        setRole(data.role);
+      }
+      setLoading(false);
     };
 
     fetchRole();
   }, [user]);
 
-  // Сброс всего при выходе
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     setSession(null);
@@ -52,7 +55,8 @@ function App() {
   };
 
   if (!session) return <AuthPage />;
-  if (!role) return <RoleSelection onSelect={setRole} />;
+  if (loading) return <p>Загрузка...</p>;
+  if (!role) return <RoleSelection userId={user.id} onSelect={setRole} />;
 
   return (
     <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
@@ -67,7 +71,10 @@ function App() {
           )}
           <span>Привет, {user?.user_metadata?.full_name || 'пользователь'}!</span>
         </div>
-        <button onClick={handleSignOut}>Выйти</button>
+        <div>
+          <button onClick={() => setRole(null)} style={{ marginRight: '1rem' }}>Сменить роль</button>
+          <button onClick={handleSignOut}>Выйти</button>
+        </div>
       </div>
 
       <hr style={{ margin: '1rem 0' }} />

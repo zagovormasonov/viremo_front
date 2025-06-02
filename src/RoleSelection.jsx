@@ -1,17 +1,24 @@
+import React from 'react';
 import { supabase } from './supabaseClient';
 
-export default function RoleSelection({ onSelect }) {
+function RoleSelection({ userId, onSelect }) {
   const selectRole = async (role) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    await supabase.from('profiles').upsert({ id: user.id, role });
+    // сохраняем роль в Supabase
+    await supabase.from('profiles').upsert({ id: userId, role });
     onSelect(role);
   };
 
   return (
-    <div>
-      <h2>Выберите роль:</h2>
-      <button onClick={() => selectRole('client')}>Клиент</button>
-      <button onClick={() => selectRole('psychologist')}>Психолог</button>
+    <div style={{ textAlign: 'center', marginTop: '3rem' }}>
+      <h2>Выберите роль</h2>
+      <button onClick={() => selectRole('client')} style={{ margin: '1rem' }}>
+        Войти как Клиент
+      </button>
+      <button onClick={() => selectRole('psychologist')} style={{ margin: '1rem' }}>
+        Войти как Психолог
+      </button>
     </div>
   );
 }
+
+export default RoleSelection;
