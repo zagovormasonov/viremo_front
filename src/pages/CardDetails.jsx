@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { supabase } from './supabase'; // или '../supabase' в зависимости от структуры
+import { supabase } from '../supabase'; // или '../supabase' в зависимости от структуры
 
 const CardDetails = () => {
   const { id } = useParams();
