@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from './supabase';
 import AuthPage from './AuthPage';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
@@ -28,6 +28,8 @@ function TabBar() {
 }
 
 function ClientApp({ user, onSignOut }) {
+  const location = useLocation();
+
   const renderUserHeader = () => (
     <div style={{ display: 'flex', alignItems: 'center', margin: '1rem' }}>
       <img
@@ -40,20 +42,18 @@ function ClientApp({ user, onSignOut }) {
   );
 
   return (
-    <Router>
-      <div style={{ paddingBottom: '60px' }}>
-        {renderUserHeader()}
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/settings" element={<Settings />} />
-        </Routes>
-      </div>
+    <div style={{ paddingBottom: '60px' }}>
+      {renderUserHeader()}
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/settings" element={<Settings />} />
+      </Routes>
       <TabBar />
       <div style={{ padding: '1rem' }}>
         <button onClick={onSignOut}>Выйти</button>
       </div>
-    </Router>
+    </div>
   );
 }
 
