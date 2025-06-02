@@ -8,6 +8,7 @@ import Settings from './pages/Settings';
 import CardDetails from './pages/CardDetails';
 import Mascot from './Mascot';
 import InternetStatusBanner from './InternetStatusBanner';
+import CreateCard from './CreateCard';
 
 function TabBar() {
   const location = useLocation();
@@ -78,7 +79,7 @@ function ClientApp({ user, onSignOut }) {
         <Route path="/" element={<Home />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/settings" element={<Settings />} />
-        <Route path="/card/:id" element={<><CardDetails /><Mascot /></>} />
+        <Route path="/create" element={<CreateCard />} />
       </Routes>
       <TabBar />
     </div>
