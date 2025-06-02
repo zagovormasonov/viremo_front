@@ -18,8 +18,8 @@ function TabBar() {
       display: 'flex',
       justifyContent: 'space-around',
       padding: '1rem',
-      backgroundColor: '#f0f0f0',
-      borderTop: '1px solid #ccc',
+      backgroundColor: 'rgb(43 43 43)',
+      color: 'white',
       zIndex: 1000,
     }}>
       <Link to="/" style={{ color: location.pathname === '/' ? 'blue' : 'black' }}>🏠 Главная</Link>
