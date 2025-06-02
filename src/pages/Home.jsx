@@ -5,19 +5,39 @@ function Home() {
   const [thoughts, setThoughts] = useState('');
   const [emotions, setEmotions] = useState('');
   const [reactions, setReactions] = useState('');
-  const [generated, setGenerated] = useState('');
+  const [generated, setGenerated] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleGenerate = () => {
-    const result = `Упражнение:
-    
-- Ситуация: ${situation}
-- Мысли: ${thoughts}
-- Эмоции: ${emotions}
-- Реакции: ${reactions}
+  const handleGenerate = async () => {
+    setLoading(true);
+    setError('');
+    setGenerated(null);
 
-Попробуй проанализировать, какие автоматические мысли возникли и как можно было бы отреагировать иначе.`;
+    const formData = new FormData();
+    formData.append('situation', situation);
+    formData.append('thoughts', thoughts);
+    formData.append('emotions', emotions);
+    formData.append('behavior', reactions);
 
-    setGenerated(result);
+    try {
+      const response = await fetch('https://viremos.onrender.com/', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (data.result) {
+        setGenerated(data.result);
+      } else {
+        setError('Ошибка при получении упражнения.');
+      }
+    } catch (err) {
+      setError('Ошибка подключения к серверу.');
+      console.error(err);
+    }
+
+    setLoading(false);
   };
 
   return (
@@ -56,11 +76,32 @@ function Home() {
         style={{ width: '100%', marginBottom: '1rem' }}
       />
 
-      <button onClick={handleGenerate}>Сгенерировать упражнение</button>
+      <button onClick={handleGenerate} disabled={loading}>
+        {loading ? 'Генерация...' : 'Сгенерировать упражнение'}
+      </button>
+
+      {error && <p style={{ color: 'red', marginTop: '1rem' }}>{error}</p>}
 
       {generated && (
-        <div style={{ marginTop: '2rem', background: '#f9f9f9', padding: '1rem', borderRadius: '8px' }}>
-          <pre>{generated}</pre>
+        <div style={{ marginTop: '2rem' }}>
+          <h3>Сгенерированные упражнения:</h3>
+          {generated.map((ex, i) => (
+            <div key={i} style={{ padding: '1rem', border: '1px solid #ccc', marginBottom: '1rem' }}>
+              <h4>{ex.title}</h4>
+              <p><strong>Время:</strong> {ex.duration}</p>
+              <p><strong>Описание:</strong> {ex.description}</p>
+              <p><strong>Инструкции:</strong> {ex.instructions}</p>
+              <h5>Шаги:</h5>
+              <ul>
+                {ex.steps.map((step, idx) => (
+                  <li key={idx}>
+                    <strong>{step.stepTitle}:</strong> {step.stepDescription}
+                    {step.inputRequired && <span> (требуется ввод)</span>}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
       )}
     </div>
