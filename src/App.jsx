@@ -46,14 +46,6 @@ function ClientApp({ user, onSignOut }) {
   return (
     <div style={{ paddingBottom: '80px' }}>
       <FixedHeader avatarUrl={user.user_metadata?.avatar_url} />
-      <div style={{ display: 'flex', alignItems: 'center', marginTop: '80px', marginBottom: '1rem', padding: '0 1rem' }}>
-        <img
-          src={user.user_metadata?.avatar_url}
-          alt="Аватар"
-          style={{ width: 50, height: 50, borderRadius: '50%', marginRight: 12 }}
-        />
-        <p>{user.email}</p>
-      </div>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/profile" element={<Profile />} />
