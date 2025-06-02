@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { supabase } from './supabase';
 import AuthPage from './AuthPage';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
@@ -23,7 +23,28 @@ function TabBar() {
   );
 }
 
-function FixedHeader({ avatarUrl }) {
+function FixedHeader({ avatarUrl, onSignOut }) {
+  const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef();
+
+  const toggleMenu = () => setShowMenu(prev => !prev);
+
+  const handleSignOut = () => {
+    setShowMenu(false);
+    onSignOut();
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
     <div style={{
       position: 'fixed', top: 0, left: 0, right: 0, height: 40,
@@ -31,11 +52,29 @@ function FixedHeader({ avatarUrl }) {
       display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000,
     }}>
       {avatarUrl && (
-        <img
-          src={avatarUrl}
-          alt="Аватар"
-          style={{ position: 'absolute', left: 10, top: 5, width: 30, height: 30, borderRadius: '50%' }}
-        />
+        <div ref={menuRef} style={{ position: 'absolute', left: 10, top: 5 }}>
+          <img
+            src={avatarUrl}
+            alt="Аватар"
+            style={{ width: 30, height: 30, borderRadius: '50%', cursor: 'pointer' }}
+            onClick={toggleMenu}
+          />
+          {showMenu && (
+            <div style={{
+              position: 'absolute', top: 35, left: 0,
+              backgroundColor: '#222', padding: '0.5rem 1rem',
+              borderRadius: 6, boxShadow: '0 2px 5px rgba(0,0,0,0.3)',
+              zIndex: 1001,
+            }}>
+              <div
+                onClick={handleSignOut}
+                style={{ color: 'white', cursor: 'pointer' }}
+              >
+                Выйти
+              </div>
+            </div>
+          )}
+        </div>
       )}
       <img src="/logo.png" alt="Логотип" style={{ height: 20 }} />
     </div>
@@ -45,7 +84,7 @@ function FixedHeader({ avatarUrl }) {
 function ClientApp({ user, onSignOut }) {
   return (
     <div style={{ paddingBottom: '80px' }}>
-      <FixedHeader avatarUrl={user.user_metadata?.avatar_url} />
+      <FixedHeader avatarUrl={user.user_metadata?.avatar_url} onSignOut={onSignOut} />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/profile" element={<Profile />} />
@@ -53,9 +92,6 @@ function ClientApp({ user, onSignOut }) {
         <Route path="/card/:id" element={<><CardDetails /><Mascot /></>} />
       </Routes>
       <TabBar />
-      <div style={{ padding: '1rem' }}>
-        <button onClick={onSignOut}>Выйти</button>
-      </div>
     </div>
   );
 }
