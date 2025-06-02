@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import CardDetails from './pages/CardDetails';
+import Mascot from './Mascot';
 
 function TabBar() {
   const location = useLocation();
