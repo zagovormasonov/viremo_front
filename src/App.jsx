@@ -7,6 +7,7 @@ import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import CardDetails from './pages/CardDetails';
 import Mascot from './Mascot';
+import InternetStatusBanner from './InternetStatusBanner';
 
 function TabBar() {
   const location = useLocation();
@@ -195,7 +196,11 @@ function App() {
   };
 
   if (loading) return <p>Загрузка...</p>;
-  if (!session) return <AuthPage />;
+  if (!session) return 
+    <>
+      <InternetStatusBanner />
+      <AuthPage />
+    </>;
 
   if (role === 'psychologist') return <PsychologistApp user={user} onSignOut={handleSignOut} />;
   if (role === 'client') return <ClientApp user={user} onSignOut={handleSignOut} />;
