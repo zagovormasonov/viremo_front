@@ -209,10 +209,8 @@ const Home = () => {
 
 const styles = {
   form: {
-    backgroundColor: '#2c2c2c',
     padding: '30px',
     borderRadius: '20px',
-    boxShadow: '0 0 10px rgba(0,0,0,0.3)',
     color: 'white',
   },
   title: {
@@ -230,7 +228,7 @@ const styles = {
   },
   textarea: {
     width: '100%',
-    minHeight: '80px',
+    minHeight: '50px',
     padding: '10px',
     borderRadius: '10px',
     border: '1px solid #555',
