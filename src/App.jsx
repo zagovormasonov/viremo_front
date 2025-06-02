@@ -5,10 +5,10 @@ import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
-import CardDetails from './pages/CardDetails';
 import Mascot from './Mascot';
 import InternetStatusBanner from './InternetStatusBanner';
-import CreateCard from './CreateCard';
+import CreateCard from './pages/CreateCard';
+import CardDetails from './pages/CardDetails';
 
 function TabBar() {
   const location = useLocation();
@@ -80,6 +80,7 @@ function ClientApp({ user, onSignOut }) {
         <Route path="/profile" element={<Profile />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/create" element={<CreateCard />} />
+        <Route path="/card/:id" element={<CardDetails />} />
       </Routes>
       <TabBar />
     </div>
