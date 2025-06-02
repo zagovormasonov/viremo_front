@@ -49,6 +49,7 @@ function ClientApp({ user, onSignOut }) {
         <Route path="/" element={<Home />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/card/:id" element={<CardDetails />} />
       </Routes>
       <TabBar />
       <div style={{ padding: '1rem' }}>
