@@ -20,10 +20,18 @@ const CreateCard = () => {
     try {
       // Отправка данных на FastAPI сервер для генерации упражнений
       const response = await fetch('https://viremos.onrender.com/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ situation, thoughts, emotions, behavior }),
-      });
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        situation: situation.trim(),
+        thoughts: thoughts.trim(),
+        emotions: emotions.trim(),
+        behavior: behavior.trim(),
+      }),
+    });
+
 
       if (!response.ok) {
         throw new Error('Ошибка генерации упражнений');
