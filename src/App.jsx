@@ -18,8 +18,8 @@ function TabBar() {
       padding: '1rem', backgroundColor: 'rgb(43 43 43)', zIndex: 1000,
     }}>
       <Link to="/" style={{ color: location.pathname === '/' ? '#007AFF' : 'white' }}>Главная</Link>
-      <Link to="/profile" style={{ color: location.pathname === '/profile' ? '#007AFF' : 'white' }}>Профиль</Link>
-      <Link to="/settings" style={{ color: location.pathname === '/settings' ? '#007AFF' : 'white' }}>Настройки</Link>
+      <Link to="/profile" style={{ color: location.pathname === '/profile' ? '#007AFF' : 'white' }}>Трекеры</Link>
+      <Link to="/settings" style={{ color: location.pathname === '/settings' ? '#007AFF' : 'white' }}>Аналитика</Link>
     </div>
   );
 }
