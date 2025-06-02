@@ -9,6 +9,7 @@ function App() {
   const [role, setRole] = useState(null);
   const [user, setUser] = useState(null);
 
+  // Слушаем сессию
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -20,13 +21,14 @@ function App() {
       if (session) setUser(session.user);
       else {
         setUser(null);
-        setRole(null);
+        setRole(null); // сброс роли при выходе
       }
     });
 
     return () => listener.subscription.unsubscribe();
   }, []);
 
+  // Загружаем роль из БД
   useEffect(() => {
     const fetchRole = async () => {
       if (!user) return;
@@ -41,11 +43,12 @@ function App() {
     fetchRole();
   }, [user]);
 
+  // Сброс всего при выходе
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     setSession(null);
-    setRole(null);
     setUser(null);
+    setRole(null);
   };
 
   if (!session) return <AuthPage />;
