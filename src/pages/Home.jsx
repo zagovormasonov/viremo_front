@@ -152,7 +152,7 @@ const Home = () => {
       <div style={{ marginTop: 40 }}>
         <h2>Ваши карточки</h2>
         {cards.map((card) => (
-          <div key={card.id} style={{ border: '1px solid #ccc', padding: 10, marginBottom: 20 }}>
+          <div key={card.id} style={{ padding: 40, marginBottom: 10, borderRadius: 20, backgroundColor: 'rgb(51 50 50)' }}>
             <p><strong>Ситуация:</strong> {card.situation}</p>
             <p><strong>Мысли:</strong> {card.thoughts}</p>
             <p><strong>Эмоции:</strong> {card.emotions}</p>
