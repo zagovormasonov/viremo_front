@@ -38,16 +38,16 @@ const CreateCard = () => {
         setError("");
 
         // Сохраняем карточку в Supabase
-        const { error: insertError } = await supabase.from("cards").insert([
+       const { error: insertError } = await supabase.from("cards").insert([
           {
             user_id: session.user.id,
             situation,
             thoughts,
             emotions,
             behavior,
-            result: JSON.stringify(data.result), // сохраняем результат как строку
           },
         ]);
+
 
         if (insertError) {
           console.error("Ошибка при сохранении карточки:", insertError.message);
