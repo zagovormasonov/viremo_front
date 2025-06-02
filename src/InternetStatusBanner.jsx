@@ -21,9 +21,9 @@ function InternetStatusBanner() {
 
   return (
     <div style={{
-      backgroundColor: '#ffdddd',
-      color: '#a00',
-      padding: '0.5rem',
+      backgroundColor: 'white',
+      color: 'black',
+      padding: '20px',
       textAlign: 'center',
       position: 'fixed',
       top: 40,
