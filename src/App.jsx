@@ -41,7 +41,6 @@ function FixedHeader() {
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      borderBottom: '1px solid #ccc',
       zIndex: 1000,
     }}>
       <img src="/logo.png" alt="Логотип" style={{ height: 20 }} />
