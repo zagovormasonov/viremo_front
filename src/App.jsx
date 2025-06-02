@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from './supabase';
 import AuthPage from './AuthPage';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
@@ -26,25 +26,6 @@ function TabBar() {
 
 function FixedHeader({ avatarUrl, onSignOut }) {
   const [showMenu, setShowMenu] = useState(false);
-  const menuRef = useRef();
-
-  const toggleMenu = () => setShowMenu(prev => !prev);
-
-  const handleSignOut = () => {
-    setShowMenu(false);
-    onSignOut();
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setShowMenu(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   return (
     <div style={{
@@ -53,26 +34,33 @@ function FixedHeader({ avatarUrl, onSignOut }) {
       display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000,
     }}>
       {avatarUrl && (
-        <div ref={menuRef} style={{ position: 'absolute', left: 10, top: 5 }}>
+        <div style={{ position: 'absolute', left: 10, top: 5 }}>
           <img
             src={avatarUrl}
             alt="Аватар"
+            onClick={() => setShowMenu(!showMenu)}
             style={{ width: 30, height: 30, borderRadius: '50%', cursor: 'pointer' }}
-            onClick={toggleMenu}
           />
           {showMenu && (
             <div style={{
-              position: 'absolute', top: 35, left: 0,
-              backgroundColor: '#222', padding: '0.5rem 1rem',
-              borderRadius: 6, boxShadow: '0 2px 5px rgba(0,0,0,0.3)',
-              zIndex: 1001,
+              position: 'absolute',
+              top: 35,
+              left: 0,
+              backgroundColor: '#fff',
+              color: '#000',
+              borderRadius: 8,
+              padding: '0.5rem',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
+              zIndex: 2000
             }}>
-              <div
-                onClick={handleSignOut}
-                style={{ color: 'white', cursor: 'pointer' }}
-              >
+              <button onClick={onSignOut} style={{
+                background: 'none',
+                border: 'none',
+                color: '#000',
+                cursor: 'pointer'
+              }}>
                 Выйти
-              </div>
+              </button>
             </div>
           )}
         </div>
@@ -196,16 +184,21 @@ function App() {
   };
 
   if (loading) return <p>Загрузка...</p>;
-  if (!session) return 
+  if (!session) return (
     <>
       <InternetStatusBanner />
       <AuthPage />
-    </>;
+    </>
+  );
 
-  if (role === 'psychologist') return <PsychologistApp user={user} onSignOut={handleSignOut} />;
-  if (role === 'client') return <ClientApp user={user} onSignOut={handleSignOut} />;
-
-  return <p>Определение роли...</p>;
+  return (
+    <>
+      <InternetStatusBanner />
+      {role === 'psychologist' && <PsychologistApp user={user} onSignOut={handleSignOut} />}
+      {role === 'client' && <ClientApp user={user} onSignOut={handleSignOut} />}
+      {!role && <p>Определение роли...</p>}
+    </>
+  );
 }
 
 export default App;
