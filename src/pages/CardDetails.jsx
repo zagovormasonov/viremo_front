@@ -1,91 +1,62 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-// Пример с маскотом в виде изображения
-import mascot from '../assets/mascot.png'; // одна папка вверх
-import Mascot from '../Mascot';
+import { supabase } from './supabase'; // или '../supabase' в зависимости от структуры
 
-const CardPage = () => {
+const CardDetails = () => {
   const { id } = useParams();
   const [card, setCard] = useState(null);
 
   useEffect(() => {
-    // Загрузка данных карточки
     const fetchCard = async () => {
-      const res = await fetch(`https://viremos.onrender.com/card/${id}`);
-      const data = await res.json();
-      setCard(data);
+      const { data, error } = await supabase
+        .from('cards')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        console.error('Ошибка при загрузке карточки:', error);
+      } else {
+        setCard(data);
+      }
     };
+
     fetchCard();
   }, [id]);
 
-  if (!card) return <div>Загрузка...</div>;
+  if (!card) return <p>Загрузка...</p>;
 
   return (
-    <div style={styles.container}>
-      {/* 🎉 Маскот-персонаж */}
-      <div style={styles.mascotContainer}>
-        <img src={mascot} alt="Mascot" style={styles.mascot} />
-      </div>
-
-      {/* Данные карточки */}
+    <div style={{ padding: 20 }}>
       <h2>Карточка</h2>
       <p><strong>Ситуация:</strong> {card.situation}</p>
       <p><strong>Мысли:</strong> {card.thoughts}</p>
       <p><strong>Эмоции:</strong> {card.emotions}</p>
       <p><strong>Поведение:</strong> {card.behavior}</p>
 
-      {card.exercises?.map((ex, index) => (
-        <div key={index} style={styles.exerciseCard}>
-          <h4>{ex.title}</h4>
-          <p><strong>Время:</strong> {ex.duration}</p>
-          <p><strong>Описание:</strong> {ex.description}</p>
-          <ul>
-            {ex.steps.map((step, idx) => (
-              <li key={idx}>
-                <strong>{step.stepTitle}</strong>: {step.stepDescription}
-              </li>
-            ))}
-          </ul>
+      {Array.isArray(card.exercises) && card.exercises.length > 0 && (
+        <div>
+          <h3>Упражнения</h3>
+          {card.exercises.map((ex, index) => (
+            <div key={index} style={{ border: '1px solid #ccc', marginBottom: 10, padding: 10 }}>
+              <h4>{ex.title}</h4>
+              <p><strong>Время:</strong> {ex.duration}</p>
+              <p><strong>Описание:</strong> {ex.description}</p>
+              <p><strong>Инструкции:</strong> {ex.instructions}</p>
+              <ul>
+                {ex.steps.map((step, i) => (
+                  <li key={i}>
+                    <strong>{step.stepTitle}</strong>: {step.stepDescription}
+                    {step.inputRequired && <em> (требуется ввод)</em>}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
-      ))}
+      )}
     </div>
   );
 };
 
-const styles = {
-  container: {
-    padding: 20,
-    maxWidth: 800,
-    margin: '0 auto',
-  },
-  mascotContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    marginBottom: 20,
-  },
-  mascot: {
-    width: '120px',
-    height: 'auto',
-    animation: 'float 3s ease-in-out infinite',
-  },
-  exerciseCard: {
-    padding: 15,
-    border: '1px solid #ccc',
-    borderRadius: 10,
-    backgroundColor: '#f2f2f2',
-    marginBottom: 15,
-  },
-};
-
-// CSS анимация (можно также вынести в CSS-файл)
-const style = document.createElement('style');
-style.innerHTML = `
-@keyframes float {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0); }
-}
-`;
-document.head.appendChild(style);
-
-export default CardPage;
+export default CardDetails;
