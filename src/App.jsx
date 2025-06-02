@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from './supabase';
 import AuthPage from './AuthPage';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
@@ -11,15 +11,9 @@ function TabBar() {
   const location = useLocation();
   return (
     <div style={{
-      position: 'fixed',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      display: 'flex',
-      justifyContent: 'space-around',
-      padding: '1rem',
-      backgroundColor: 'rgb(43 43 43)',
-      zIndex: 1000,
+      position: 'fixed', bottom: 0, left: 0, right: 0,
+      display: 'flex', justifyContent: 'space-around',
+      padding: '1rem', backgroundColor: 'rgb(43 43 43)', zIndex: 1000,
     }}>
       <Link to="/" style={{ color: location.pathname === '/' ? '#007AFF' : 'white' }}>Главная</Link>
       <Link to="/profile" style={{ color: location.pathname === '/profile' ? '#007AFF' : 'white' }}>Профиль</Link>
@@ -31,46 +25,56 @@ function TabBar() {
 function FixedHeader({ avatarUrl }) {
   return (
     <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      height: 60,
+      position: 'fixed', top: 0, left: 0, right: 0, height: 40,
       backgroundColor: 'rgb(36 36 36)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '0 1rem',
-      zIndex: 1000,
+      display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000,
     }}>
-      {/* Аватар слева */}
-      <div style={{ position: 'absolute', left: 16 }}>
-        {avatarUrl && (
-          <img
-            src={avatarUrl}
-            alt="Аватар"
-            style={{ width: 36, height: 36, borderRadius: '50%' }}
-          />
-        )}
-      </div>
-      {/* Логотип по центру */}
-      <img src="/logo.png" alt="Логотип" style={{ height: 24 }} />
+      {avatarUrl && (
+        <img
+          src={avatarUrl}
+          alt="Аватар"
+          style={{ position: 'absolute', left: 10, top: 5, width: 30, height: 30, borderRadius: '50%' }}
+        />
+      )}
+      <img src="/logo.png" alt="Логотип" style={{ height: 20 }} />
     </div>
   );
 }
 
-function ClientApp({ user, onSignOut }) {
-  const location = useLocation();
-  const avatarUrl = user.user_metadata?.avatar_url;
-
+function Mascot() {
   return (
-    <div style={{ paddingTop: '70px', paddingBottom: '80px' }}>
-      <FixedHeader avatarUrl={avatarUrl} />
+    <img
+      src="/mascot.png"
+      alt="Маскот"
+      style={{
+        position: 'fixed',
+        bottom: 90,
+        right: 10,
+        width: 100,
+        height: 'auto',
+        zIndex: 1000,
+      }}
+    />
+  );
+}
+
+function ClientApp({ user, onSignOut }) {
+  return (
+    <div style={{ paddingBottom: '80px' }}>
+      <FixedHeader avatarUrl={user.user_metadata?.avatar_url} />
+      <div style={{ display: 'flex', alignItems: 'center', marginTop: '80px', marginBottom: '1rem', padding: '0 1rem' }}>
+        <img
+          src={user.user_metadata?.avatar_url}
+          alt="Аватар"
+          style={{ width: 50, height: 50, borderRadius: '50%', marginRight: 12 }}
+        />
+        <p>{user.email}</p>
+      </div>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/settings" element={<Settings />} />
-        <Route path="/card/:id" element={<CardDetails />} />
+        <Route path="/card/:id" element={<><CardDetails /><Mascot /></>} />
       </Routes>
       <TabBar />
       <div style={{ padding: '1rem' }}>
@@ -110,9 +114,7 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user || null);
     });
@@ -141,7 +143,7 @@ function App() {
         .single();
 
       if (error && error.code !== 'PGRST116') {
-        console.error("Ошибка при получении роли:", error.message);
+        console.error('Ошибка при получении роли:', error.message);
         setLoading(false);
         return;
       }
@@ -152,16 +154,14 @@ function App() {
         const email = user.email;
         const newRole = email.endsWith('@viremo.com') ? 'psychologist' : 'client';
 
-        const { error: upsertError } = await supabase
-          .from('profiles')
-          .upsert({
-            id: user.id,
-            email,
-            role: newRole,
-          });
+        const { error: upsertError } = await supabase.from('profiles').upsert({
+          id: user.id,
+          email,
+          role: newRole,
+        });
 
         if (upsertError) {
-          console.error("Ошибка при сохранении роли:", upsertError.message);
+          console.error('Ошибка при сохранении роли:', upsertError.message);
           setLoading(false);
           return;
         }
@@ -185,13 +185,8 @@ function App() {
   if (loading) return <p>Загрузка...</p>;
   if (!session) return <AuthPage />;
 
-  if (role === 'psychologist') {
-    return <PsychologistApp user={user} onSignOut={handleSignOut} />;
-  }
-
-  if (role === 'client') {
-    return <ClientApp user={user} onSignOut={handleSignOut} />;
-  }
+  if (role === 'psychologist') return <PsychologistApp user={user} onSignOut={handleSignOut} />;
+  if (role === 'client') return <ClientApp user={user} onSignOut={handleSignOut} />;
 
   return <p>Определение роли...</p>;
 }
