@@ -38,7 +38,7 @@ function Mascot() {
           padding: '8px 12px',
           marginBottom: 8,
           boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
-          maxWidth: 180,
+          maxWidth: 60,
           fontSize: 14,
           position: 'absolute',
           bottom: 110,
@@ -52,7 +52,7 @@ function Mascot() {
         src="/mascot.png"
         alt="Маскот"
         style={{
-          width: 100,
+          width: 50,
           height: 'auto',
         }}
       />
