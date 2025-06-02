@@ -36,15 +36,15 @@ function FixedHeader() {
       top: 0,
       left: 0,
       right: 0,
-      height: 60,
-      backgroundColor: '#ffffff',
+      height: 40,
+      backgroundColor: 'rgb(36 36 36)',
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
       borderBottom: '1px solid #ccc',
       zIndex: 1000,
     }}>
-      <img src="/logo.png" alt="Логотип" style={{ height: 40 }} />
+      <img src="/logo.png" alt="Логотип" style={{ height: 20 }} />
     </div>
   );
 }
