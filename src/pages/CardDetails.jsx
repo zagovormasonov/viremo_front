@@ -1,59 +1,65 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { supabase } from '../supabase'; // или '../supabase' в зависимости от структуры
+import { supabase } from '../supabase';
 
 const CardDetails = () => {
   const { id } = useParams();
   const [card, setCard] = useState(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchCard = async () => {
-      const { data, error } = await supabase
-        .from('cards')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (error) {
-        console.error('Ошибка при загрузке карточки:', error);
-      } else {
-        setCard(data);
-      }
-    };
-
     fetchCard();
-  }, [id]);
+  }, []);
 
-  if (!card) return <p>Загрузка...</p>;
+  const fetchCard = async () => {
+    const { data, error } = await supabase
+      .from('cards')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      setError('Ошибка загрузки карточки');
+      console.error(error);
+    } else {
+      setCard({
+        ...data,
+        result: typeof data.result === 'string' ? JSON.parse(data.result) : data.result,
+      });
+    }
+  };
+
+  if (error) return <div>{error}</div>;
+  if (!card) return <div>Загрузка...</div>;
 
   return (
     <div style={{ padding: 20 }}>
-      <h2>Карточка</h2>
+      <h2>Детали карточки</h2>
       <p><strong>Ситуация:</strong> {card.situation}</p>
       <p><strong>Мысли:</strong> {card.thoughts}</p>
       <p><strong>Эмоции:</strong> {card.emotions}</p>
       <p><strong>Поведение:</strong> {card.behavior}</p>
 
-      {Array.isArray(card.exercises) && card.exercises.length > 0 && (
-        <div>
-          <h3>Упражнения</h3>
-          {card.exercises.map((ex, index) => (
-            <div key={index} style={{ border: '1px solid #ccc', marginBottom: 10, padding: 10 }}>
-              <h4>{ex.title}</h4>
-              <p><strong>Время:</strong> {ex.duration}</p>
-              <p><strong>Описание:</strong> {ex.description}</p>
-              <p><strong>Инструкции:</strong> {ex.instructions}</p>
-              <ul>
-                {ex.steps.map((step, i) => (
-                  <li key={i}>
-                    <strong>{step.stepTitle}</strong>: {step.stepDescription}
-                    {step.inputRequired && <em> (требуется ввод)</em>}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
+      <h3>Упражнения:</h3>
+      {card.result && Array.isArray(card.result) ? (
+        card.result.map((exercise, index) => (
+          <div key={index} style={{ marginBottom: 20 }}>
+            <h4>{exercise.title}</h4>
+            <p><strong>Время:</strong> {exercise.duration}</p>
+            <p>{exercise.description}</p>
+            <p><em>{exercise.instructions}</em></p>
+            <ul>
+              {exercise.steps.map((step, i) => (
+                <li key={i}>
+                  <strong>{step.stepTitle}:</strong> {step.stepDescription}
+                  {step.inputRequired && <em> (нужно ввести текст)</em>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      ) : (
+        <p>Упражнения отсутствуют.</p>
       )}
     </div>
   );
