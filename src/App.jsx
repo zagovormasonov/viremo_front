@@ -1,37 +1,39 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { supabase } from './supabaseClient';
 import AuthPage from './AuthPage';
-import RoleSelection from './RoleSelection';
-import PsychologistDashboard from './PsychologistDashboard';
 
 function App() {
   const [session, setSession] = useState(null);
-  const [role, setRole] = useState(null);
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); // для ожидания fetch-а
+  const [role, setRole] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      setSession(session);
+      setUser(session?.user || null);
+    });
+
+    // Проверка текущей сессии
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      if (session) setUser(session.user);
+      setUser(session?.user || null);
     });
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (session) setUser(session.user);
-      else {
-        setUser(null);
-        setRole(null);
-      }
-    });
-
-    return () => listener.subscription.unsubscribe();
+    return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
     const fetchRole = async () => {
-      if (!user) return;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
+
       const { data, error } = await supabase
         .from('profiles')
         .select('role')
@@ -40,7 +42,17 @@ function App() {
 
       if (data?.role) {
         setRole(data.role);
+      } else {
+        const email = user.email;
+        const newRole = email.endsWith('@viremo.com') ? 'psychologist' : 'client';
+
+        await supabase
+          .from('profiles')
+          .upsert({ id: user.id, email, role: newRole });
+
+        setRole(newRole);
       }
+
       setLoading(false);
     };
 
@@ -52,37 +64,41 @@ function App() {
     setSession(null);
     setUser(null);
     setRole(null);
+    localStorage.removeItem('supabase.auth.token');
+    sessionStorage.clear();
   };
 
-  if (!session) return <AuthPage />;
   if (loading) return <p>Загрузка...</p>;
-  if (!role) return <RoleSelection userId={user.id} onSelect={setRole} />;
 
-  return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          {user?.user_metadata?.avatar_url && (
-            <img
-              src={user.user_metadata.avatar_url}
-              alt="Аватар"
-              style={{ width: '50px', height: '50px', borderRadius: '50%' }}
-            />
-          )}
-          <span>Привет, {user?.user_metadata?.full_name || 'пользователь'}!</span>
-        </div>
-        <div>
-          <button onClick={() => setRole(null)} style={{ marginRight: '1rem' }}>Сменить роль</button>
-          <button onClick={handleSignOut}>Выйти</button>
-        </div>
+  if (!session) return <AuthPage />;
+
+  if (role === 'psychologist') {
+    return (
+      <div style={{ padding: '2rem' }}>
+        <h2>Личный кабинет психолога</h2>
+        <p>Добро пожаловать, {user.email}</p>
+        <h4>Тестовые клиенты:</h4>
+        <ul>
+          <li>Иван Иванов</li>
+          <li>Мария Петрова</li>
+          <li>Алексей Смирнов</li>
+        </ul>
+        <button onClick={handleSignOut}>Выйти</button>
       </div>
+    );
+  }
 
-      <hr style={{ margin: '1rem 0' }} />
+  if (role === 'client') {
+    return (
+      <div style={{ padding: '2rem' }}>
+        <h2>Главная клиента</h2>
+        <p>Здравствуйте, {user.email}</p>
+        <button onClick={handleSignOut}>Выйти</button>
+      </div>
+    );
+  }
 
-      {role === 'client' && <h2>Вы вошли как <strong>Клиент</strong></h2>}
-      {role === 'psychologist' && <PsychologistDashboard />}
-    </div>
-  );
+  return <p>Определение роли...</p>;
 }
 
 export default App;

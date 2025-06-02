@@ -1,17 +1,25 @@
+import React from 'react';
 import { supabase } from './supabaseClient';
 
-export default function AuthPage() {
-  const handleSignIn = async () => {
+function AuthPage() {
+  const signInWithGoogle = async () => {
+    // Всегда запрашивать выбор аккаунта
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin },
+      options: {
+        queryParams: {
+          prompt: 'select_account',
+        },
+      },
     });
   };
 
   return (
-    <div>
-      <h2>Вход через Google</h2>
-      <button onClick={handleSignIn}>Войти</button>
+    <div style={{ textAlign: 'center', marginTop: '4rem' }}>
+      <h2>Вход в приложение</h2>
+      <button onClick={signInWithGoogle}>Войти через Google</button>
     </div>
   );
 }
+
+export default AuthPage;
