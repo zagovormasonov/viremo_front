@@ -276,26 +276,27 @@ const styles = {
     color: 'white',
     cursor: 'pointer',
   },
-  loaderOverlay: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    width: '100vw',
-    height: '100vh',
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    zIndex: 9999,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  spinner: {
-    width: '60px',
-    height: '60px',
-    border: '6px solid #f3f3f3',
-    borderTop: '6px solid #4caf50',
-    borderRadius: '50%',
-    animation: 'spin 1s linear infinite',
-  },
+    loaderOverlay: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        zIndex: 9999,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+    spinner: {
+        width: '48px',
+        height: '48px',
+        border: '5px solid rgba(255, 255, 255, 0.2)',
+        borderTop: '5px solid white',
+        borderRadius: '50%',
+        animation: 'spin 1s linear infinite',
+    },
 };
 
 const GlobalStyles = () => (
