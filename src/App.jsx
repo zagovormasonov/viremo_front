@@ -42,23 +42,6 @@ function FixedHeader({ avatarUrl }) {
   );
 }
 
-function Mascot() {
-  return (
-    <img
-      src="/mascot.png"
-      alt="Маскот"
-      style={{
-        position: 'fixed',
-        bottom: 90,
-        right: 10,
-        width: 100,
-        height: 'auto',
-        zIndex: 1000,
-      }}
-    />
-  );
-}
-
 function ClientApp({ user, onSignOut }) {
   return (
     <div style={{ paddingBottom: '80px' }}>
