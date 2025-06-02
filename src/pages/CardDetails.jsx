@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 // Пример с маскотом в виде изображения
-import mascot from '../../assets/mascot.png';
+import mascot from '../assets/mascot.png'; // одна папка вверх
 import Mascot from '../Mascot';
 
 const CardPage = () => {
