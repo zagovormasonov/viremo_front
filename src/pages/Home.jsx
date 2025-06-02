@@ -213,10 +213,8 @@ const styles = {
     color: 'white',
   },
   form: {
-    backgroundColor: '#2e2e2e',
     padding: 20,
-    borderRadius: 10,
-    boxShadow: '0 0 10px rgba(0,0,0,0.5)',
+    borderRadius: 20,
   },
   title: {
     textAlign: 'center',
