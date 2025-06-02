@@ -8,7 +8,6 @@ function App() {
   const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Отслеживание изменений сессии
   useEffect(() => {
     const {
       data: { subscription },
@@ -17,7 +16,6 @@ function App() {
       setUser(session?.user || null);
     });
 
-    // Проверка текущей сессии при первом запуске
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user || null);
@@ -26,7 +24,6 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Определение роли
   useEffect(() => {
     const fetchRole = async () => {
       if (!user?.id) {
@@ -58,7 +55,11 @@ function App() {
 
         const { error: upsertError } = await supabase
           .from('profiles')
-          .upsert({ id: user.id, email, role: newRole });
+          .upsert({
+            id: user.id,
+            email,
+            role: newRole,
+          });
 
         if (upsertError) {
           console.error("Ошибка при upsert:", upsertError.message);
@@ -85,6 +86,26 @@ function App() {
     sessionStorage.clear();
   };
 
+  const renderUserHeader = () => {
+    if (!user) return null;
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
+        <img
+          src={user.user_metadata?.avatar_url}
+          alt="Аватар"
+          style={{
+            width: '50px',
+            height: '50px',
+            borderRadius: '50%',
+            objectFit: 'cover',
+            marginRight: '1rem',
+          }}
+        />
+        <p>{user.email}</p>
+      </div>
+    );
+  };
+
   if (loading) return <p>Загрузка...</p>;
   if (!session) return <AuthPage />;
 
@@ -92,7 +113,7 @@ function App() {
     return (
       <div style={{ padding: '2rem' }}>
         <h2>Личный кабинет психолога</h2>
-        <p>Добро пожаловать, {user.email}</p>
+        {renderUserHeader()}
         <h4>Тестовые клиенты:</h4>
         <ul>
           <li>Иван Иванов</li>
@@ -108,7 +129,7 @@ function App() {
     return (
       <div style={{ padding: '2rem' }}>
         <h2>Главная клиента</h2>
-        <p>Здравствуйте, {user.email}</p>
+        {renderUserHeader()}
         <button onClick={handleSignOut}>Выйти</button>
       </div>
     );
