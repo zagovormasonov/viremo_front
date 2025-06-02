@@ -28,43 +28,44 @@ function TabBar() {
   );
 }
 
-function FixedHeader() {
+function FixedHeader({ avatarUrl }) {
   return (
     <div style={{
       position: 'fixed',
       top: 0,
       left: 0,
       right: 0,
-      height: 40,
+      height: 60,
       backgroundColor: 'rgb(36 36 36)',
       display: 'flex',
-      justifyContent: 'center',
       alignItems: 'center',
+      justifyContent: 'center',
+      padding: '0 1rem',
       zIndex: 1000,
     }}>
-      <img src="/logo.png" alt="Логотип" style={{ height: 20 }} />
+      {/* Аватар слева */}
+      <div style={{ position: 'absolute', left: 16 }}>
+        {avatarUrl && (
+          <img
+            src={avatarUrl}
+            alt="Аватар"
+            style={{ width: 36, height: 36, borderRadius: '50%' }}
+          />
+        )}
+      </div>
+      {/* Логотип по центру */}
+      <img src="/logo.png" alt="Логотип" style={{ height: 24 }} />
     </div>
   );
 }
 
 function ClientApp({ user, onSignOut }) {
   const location = useLocation();
-
-  const renderUserHeader = () => (
-    <div style={{ display: 'flex', alignItems: 'center', marginTop: '80px', marginBottom: '1rem', padding: '0 1rem' }}>
-      <img
-        src={user.user_metadata?.avatar_url}
-        alt="Аватар"
-        style={{ width: 50, height: 50, borderRadius: '50%', marginRight: 12 }}
-      />
-      <p>{user.email}</p>
-    </div>
-  );
+  const avatarUrl = user.user_metadata?.avatar_url;
 
   return (
-    <div style={{ paddingBottom: '80px' }}>
-      <FixedHeader />
-      {renderUserHeader()}
+    <div style={{ paddingTop: '70px', paddingBottom: '80px' }}>
+      <FixedHeader avatarUrl={avatarUrl} />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/profile" element={<Profile />} />
