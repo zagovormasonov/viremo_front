@@ -7,7 +7,7 @@ import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import Mascot from './Mascot';
 import InternetStatusBanner from './InternetStatusBanner';
-import CreateCard from './pages/CreateCard';
+import CreateCard from './CreateCard';
 import CardDetails from './pages/CardDetails';
 
 function TabBar() {
