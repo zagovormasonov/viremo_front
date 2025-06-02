@@ -27,6 +27,7 @@ export default function AuthPage() {
       <img
         src="/psychology-illustration.png"
         alt="Иллюстрация психологического сервиса"
+        loading="lazy"
         style={{
           width: '300px',
           maxWidth: '100%',

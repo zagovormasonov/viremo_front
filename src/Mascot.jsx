@@ -50,6 +50,7 @@ function Mascot() {
       )}
       <img
         src="/mascot.png"
+        loading="lazy"
         alt="Маскот"
         style={{
           width: 50,
