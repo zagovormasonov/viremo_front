@@ -102,12 +102,19 @@ const Home = () => {
   }
 
   return (
-    <div style={{ padding: 20, maxWidth: 800, margin: '0 auto', color: 'white' }}>
+    <div style={styles.container}>
+      {loading && (
+        <div style={styles.loaderOverlay}>
+          <div style={styles.spinner}></div>
+        </div>
+      )}
+      <GlobalStyles />
+
       <form onSubmit={handleSubmit} style={styles.form}>
         <h2 style={styles.title}>Создание CBT-карточки</h2>
 
         <div style={styles.field}>
-          <label style={styles.label}>Ситуация</label>
+          <label>Ситуация</label>
           <textarea
             value={situation}
             onChange={(e) => setSituation(e.target.value)}
@@ -117,7 +124,7 @@ const Home = () => {
         </div>
 
         <div style={styles.field}>
-          <label style={styles.label}>Мысли</label>
+          <label>Мысли</label>
           <textarea
             value={thoughts}
             onChange={(e) => setThoughts(e.target.value)}
@@ -127,7 +134,7 @@ const Home = () => {
         </div>
 
         <div style={styles.field}>
-          <label style={styles.label}>Эмоции</label>
+          <label>Эмоции</label>
           <textarea
             value={emotions}
             onChange={(e) => setEmotions(e.target.value)}
@@ -137,7 +144,7 @@ const Home = () => {
         </div>
 
         <div style={styles.field}>
-          <label style={styles.label}>Поведение</label>
+          <label>Поведение</label>
           <textarea
             value={behavior}
             onChange={(e) => setBehavior(e.target.value)}
@@ -146,10 +153,9 @@ const Home = () => {
           />
         </div>
 
-        <button type="submit" disabled={loading} style={styles.button}>
+        <button type="submit" style={styles.button} disabled={loading}>
           {loading ? 'Генерация...' : 'Сгенерировать упражнения'}
         </button>
-
         {error && <p style={styles.error}>{error}</p>}
       </form>
 
@@ -157,7 +163,7 @@ const Home = () => {
         <div style={{ marginTop: 30 }}>
           <h3>Упражнения</h3>
           {exercises.map((ex, index) => (
-            <div key={index} style={{ border: '1px solid #ccc', padding: 10, marginBottom: 10 }}>
+            <div key={index} style={styles.exerciseCard}>
               <h4>{ex.title}</h4>
               <p><strong>Время:</strong> {ex.duration}</p>
               <p><strong>Описание:</strong> {ex.description}</p>
@@ -178,25 +184,17 @@ const Home = () => {
       <div style={{ marginTop: 40 }}>
         <h2>Ваши карточки</h2>
         {cards.map((card) => (
-          <div
-            key={card.id}
-            style={{
-              padding: 40,
-              marginBottom: 10,
-              borderRadius: 20,
-              backgroundColor: 'rgb(51 50 50)',
-            }}
-          >
+          <div key={card.id} style={styles.card}>
             <p><strong>Ситуация:</strong> {card.situation}</p>
             <p><strong>Мысли:</strong> {card.thoughts}</p>
             <p><strong>Эмоции:</strong> {card.emotions}</p>
             <p><strong>Поведение:</strong> {card.behavior}</p>
             <Link to={`/card/${card.id}`}>
-              <button style={{ marginRight: 10 }}>Открыть</button>
+              <button style={styles.openButton}>Открыть</button>
             </Link>
             <button
               onClick={() => handleDelete(card.id)}
-              style={{ backgroundColor: '#f44336', color: 'white' }}
+              style={styles.deleteButton}
             >
               Удалить
             </button>
@@ -208,52 +206,107 @@ const Home = () => {
 };
 
 const styles = {
-  form: {
-    padding: '30px',
-    borderRadius: '20px',
+  container: {
+    padding: 20,
+    maxWidth: 800,
+    margin: '0 auto',
     color: 'white',
   },
+  form: {
+    backgroundColor: '#2e2e2e',
+    padding: 20,
+    borderRadius: 10,
+    boxShadow: '0 0 10px rgba(0,0,0,0.5)',
+  },
   title: {
-    marginBottom: '20px',
-    fontSize: '24px',
     textAlign: 'center',
+    marginBottom: 20,
   },
   field: {
-    marginBottom: '20px',
-  },
-  label: {
-    display: 'block',
-    marginBottom: '6px',
-    fontWeight: 'bold',
+    marginBottom: 15,
   },
   textarea: {
     width: '95%',
-    minHeight: '50px',
-    padding: '10px',
-    borderRadius: '10px',
-    border: '1px solid #555',
-    backgroundColor: '#1e1e1e',
-    color: 'white',
-    fontSize: '14px',
+    minHeight: 60,
+    padding: 10,
+    borderRadius: 5,
+    border: '1px solid #ccc',
+    fontSize: 16,
     resize: 'vertical',
-    transition: 'border 0.3s',
   },
   button: {
     width: '100%',
-    padding: '12px',
+    padding: 10,
     backgroundColor: '#4caf50',
     color: 'white',
+    fontSize: 16,
     border: 'none',
-    borderRadius: '10px',
-    fontSize: '16px',
+    borderRadius: 5,
     cursor: 'pointer',
-    transition: 'background-color 0.3s',
   },
   error: {
-    color: 'tomato',
-    marginTop: '10px',
+    color: 'red',
+    marginTop: 10,
     textAlign: 'center',
   },
+  exerciseCard: {
+    backgroundColor: '#3b3b3b',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 15,
+  },
+  card: {
+    padding: 20,
+    marginBottom: 10,
+    borderRadius: 20,
+    backgroundColor: 'rgb(51 50 50)',
+  },
+  openButton: {
+    marginRight: 10,
+    padding: '8px 12px',
+    borderRadius: 5,
+    border: 'none',
+    backgroundColor: '#2196f3',
+    color: 'white',
+    cursor: 'pointer',
+  },
+  deleteButton: {
+    padding: '8px 12px',
+    borderRadius: 5,
+    border: 'none',
+    backgroundColor: '#f44336',
+    color: 'white',
+    cursor: 'pointer',
+  },
+  loaderOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100vw',
+    height: '100vh',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    zIndex: 9999,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  spinner: {
+    width: '60px',
+    height: '60px',
+    border: '6px solid #f3f3f3',
+    borderTop: '6px solid #4caf50',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite',
+  },
 };
+
+const GlobalStyles = () => (
+  <style>{`
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  `}</style>
+);
 
 export default Home;
