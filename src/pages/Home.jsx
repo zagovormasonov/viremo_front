@@ -227,7 +227,7 @@ const styles = {
     fontWeight: 'bold',
   },
   textarea: {
-    width: '100%',
+    width: '95%',
     minHeight: '50px',
     padding: '10px',
     borderRadius: '10px',
