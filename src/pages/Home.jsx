@@ -102,29 +102,55 @@ const Home = () => {
   }
 
   return (
-    <div style={{ padding: 20, maxWidth: 800, margin: '0 auto' }}>
-      <h2>Создание CBT-карточки</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Ситуация</label>
-          <textarea value={situation} onChange={(e) => setSituation(e.target.value)} required />
+    <div style={{ padding: 20, maxWidth: 800, margin: '0 auto', color: 'white' }}>
+      <form onSubmit={handleSubmit} style={styles.form}>
+        <h2 style={styles.title}>Создание CBT-карточки</h2>
+
+        <div style={styles.field}>
+          <label style={styles.label}>Ситуация</label>
+          <textarea
+            value={situation}
+            onChange={(e) => setSituation(e.target.value)}
+            required
+            style={styles.textarea}
+          />
         </div>
-        <div>
-          <label>Мысли</label>
-          <textarea value={thoughts} onChange={(e) => setThoughts(e.target.value)} required />
+
+        <div style={styles.field}>
+          <label style={styles.label}>Мысли</label>
+          <textarea
+            value={thoughts}
+            onChange={(e) => setThoughts(e.target.value)}
+            required
+            style={styles.textarea}
+          />
         </div>
-        <div>
-          <label>Эмоции</label>
-          <textarea value={emotions} onChange={(e) => setEmotions(e.target.value)} required />
+
+        <div style={styles.field}>
+          <label style={styles.label}>Эмоции</label>
+          <textarea
+            value={emotions}
+            onChange={(e) => setEmotions(e.target.value)}
+            required
+            style={styles.textarea}
+          />
         </div>
-        <div>
-          <label>Поведение</label>
-          <textarea value={behavior} onChange={(e) => setBehavior(e.target.value)} required />
+
+        <div style={styles.field}>
+          <label style={styles.label}>Поведение</label>
+          <textarea
+            value={behavior}
+            onChange={(e) => setBehavior(e.target.value)}
+            required
+            style={styles.textarea}
+          />
         </div>
-        <button type="submit" disabled={loading}>
+
+        <button type="submit" disabled={loading} style={styles.button}>
           {loading ? 'Генерация...' : 'Сгенерировать упражнения'}
         </button>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
+
+        {error && <p style={styles.error}>{error}</p>}
       </form>
 
       {exercises.length > 0 && (
@@ -152,7 +178,15 @@ const Home = () => {
       <div style={{ marginTop: 40 }}>
         <h2>Ваши карточки</h2>
         {cards.map((card) => (
-          <div key={card.id} style={{ padding: 40, marginBottom: 10, borderRadius: 20, backgroundColor: 'rgb(51 50 50)' }}>
+          <div
+            key={card.id}
+            style={{
+              padding: 40,
+              marginBottom: 10,
+              borderRadius: 20,
+              backgroundColor: 'rgb(51 50 50)',
+            }}
+          >
             <p><strong>Ситуация:</strong> {card.situation}</p>
             <p><strong>Мысли:</strong> {card.thoughts}</p>
             <p><strong>Эмоции:</strong> {card.emotions}</p>
@@ -171,6 +205,57 @@ const Home = () => {
       </div>
     </div>
   );
+};
+
+const styles = {
+  form: {
+    backgroundColor: '#2c2c2c',
+    padding: '30px',
+    borderRadius: '20px',
+    boxShadow: '0 0 10px rgba(0,0,0,0.3)',
+    color: 'white',
+  },
+  title: {
+    marginBottom: '20px',
+    fontSize: '24px',
+    textAlign: 'center',
+  },
+  field: {
+    marginBottom: '20px',
+  },
+  label: {
+    display: 'block',
+    marginBottom: '6px',
+    fontWeight: 'bold',
+  },
+  textarea: {
+    width: '100%',
+    minHeight: '80px',
+    padding: '10px',
+    borderRadius: '10px',
+    border: '1px solid #555',
+    backgroundColor: '#1e1e1e',
+    color: 'white',
+    fontSize: '14px',
+    resize: 'vertical',
+    transition: 'border 0.3s',
+  },
+  button: {
+    width: '100%',
+    padding: '12px',
+    backgroundColor: '#4caf50',
+    color: 'white',
+    border: 'none',
+    borderRadius: '10px',
+    fontSize: '16px',
+    cursor: 'pointer',
+    transition: 'background-color 0.3s',
+  },
+  error: {
+    color: 'tomato',
+    marginTop: '10px',
+    textAlign: 'center',
+  },
 };
 
 export default Home;
