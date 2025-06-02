@@ -93,8 +93,6 @@ const styles = {
   },
   generateButton: {
     bottom: 20,
-    left: '50%',
-    transform: 'translateX(-50%)',
     padding: '14px 28px',
     fontSize: '16px',
     borderRadius: '12px',
