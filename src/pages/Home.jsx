@@ -1,6 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { supabase } from "../supabase"; // Убедись, что файл и путь правильные
+import { useSession } from "@supabase/auth-helpers-react";
 
 function Home() {
+  const session = useSession();
   const [situation, setSituation] = useState("");
   const [thoughts, setThoughts] = useState("");
   const [emotions, setEmotions] = useState("");
@@ -24,21 +27,33 @@ function Home() {
 
       const response = await fetch("https://viremos.onrender.com", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: formData,
       });
 
       const data = await response.json();
       if (data.result && Array.isArray(data.result)) {
         setExercises(data.result);
+
+        // ⬇️ Сохраняем всё в Supabase
+        const { error: insertError } = await supabase
+          .from("cards")
+          .insert({
+            user_id: session.user.id,
+            situation,
+            thoughts,
+            emotions,
+            behavior,
+            exercises: data.result,
+          });
+
+        if (insertError) throw insertError;
       } else {
         setError("Некорректный ответ от сервера");
       }
     } catch (err) {
-      setError("Произошла ошибка при отправке данных");
-      console.error(err);
+      setError("Ошибка: " + err.message);
+      console.error("❌", err);
     } finally {
       setLoading(false);
     }
