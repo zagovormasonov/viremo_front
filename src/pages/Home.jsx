@@ -3,7 +3,7 @@ import { useSession } from '@supabase/auth-helpers-react';
 import { supabase } from '../supabase';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Tabs } from 'antd'; // в начале файла
+import { Tabs, Button } from 'antd'; // в начале файла
 
 const Home = () => {
   const session = useSession();
@@ -147,28 +147,29 @@ const Home = () => {
 
                 <div style={{ marginTop: 10 }}>
                   <Link to={`/card/${card.id}`}>
-                    <button
-                      style={{ marginRight: 10 }}
+                    <Button
+                      type='primary'
                       onClick={() => handleOpenCard(card.id)}
                     >
                       Открыть
-                    </button>
+                    </Button>
                   </Link>
 
                   {activeTab === 'archived' ? (
-                    <button
+                    <Button
+                      type='primary'
                       onClick={() => handleUnarchiveCard(card.id)}
-                      style={{ backgroundColor: '#4caf50', color: 'white' }}
+                      
                     >
                       Вернуть
-                    </button>
+                    </Button>
                   ) : (
-                    <button
+                    <Button
+                    type='danger'
                       onClick={() => handleDelete(card.id)}
-                      style={{ backgroundColor: '#f44336', color: 'white' }}
                     >
                       Удалить
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
