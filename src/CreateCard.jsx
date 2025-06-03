@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { supabase } from "./supabase"; // путь может отличаться
+import { supabase } from "./supabase";
 
 const CreateCard = () => {
   const [situation, setSituation] = useState("");
@@ -8,12 +8,11 @@ const CreateCard = () => {
   const [behavior, setBehavior] = useState("");
   const [exercises, setExercises] = useState([]);
   const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleGenerate = async () => {
+    setLoading(true);
     setError("");
-    setSuccessMessage("");
 
     try {
       const response = await fetch("https://viremos.onrender.com/", {
@@ -29,90 +28,93 @@ const CreateCard = () => {
         }),
       });
 
-      const data = await response.json();
+      const result = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || "Ошибка генерации упражнений");
+      if (result.error) {
+        setError("Ошибка генерации упражнений");
+        console.error(result.error);
+      } else {
+        setExercises(result.result);
       }
+    } catch (e) {
+      console.error("Ошибка при запросе:", e);
+      setError("Ошибка подключения к серверу");
+    }
 
-      const generatedExercises = data.result;
+    setLoading(false);
+  };
 
-      // Сохраняем карточку в Supabase
-      const { data: savedCard, error: saveError } = await supabase
-        .from("cards")
-        .insert([
-          {
-            situation,
-            thoughts,
-            emotions,
-            behavior,
-            exercises: generatedExercises, // если тип поля exercises = json
-            // если тип text, то JSON.stringify(generatedExercises)
-          },
-        ]);
+  const handleSave = async () => {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
 
-      if (saveError) {
-        console.error("Ошибка при сохранении карточки:", saveError);
-        setError("Ошибка при сохранении карточки");
-        return;
-      }
+    if (userError || !user) {
+      setError("Не удалось получить текущего пользователя");
+      return;
+    }
 
-      setExercises(generatedExercises);
-      setSuccessMessage("Карточка успешно создана!");
-    } catch (err) {
-      console.error("Ошибка:", err);
-      setError(err.message || "Сервер недоступен или возникла ошибка.");
+    const { error: insertError } = await supabase.from("cards").insert([
+      {
+        situation,
+        thoughts,
+        emotions,
+        behavior,
+        exercises, // Можно оставить как есть, Supabase сам сериализует JSON
+        user_id: user.id, // 🟢 Передаём ID текущего пользователя
+      },
+    ]);
+
+    if (insertError) {
+      console.error("Ошибка при сохранении карточки:", insertError);
+      setError("Ошибка при сохранении карточки");
+    } else {
+      alert("Карточка успешно сохранена!");
+      setError("");
     }
   };
 
   return (
     <div>
-      <h2>Создать карточку</h2>
-      <form onSubmit={handleSubmit}>
-        <textarea
-          placeholder="Ситуация"
-          value={situation}
-          onChange={(e) => setSituation(e.target.value)}
-        />
-        <textarea
-          placeholder="Мысли"
-          value={thoughts}
-          onChange={(e) => setThoughts(e.target.value)}
-        />
-        <textarea
-          placeholder="Эмоции"
-          value={emotions}
-          onChange={(e) => setEmotions(e.target.value)}
-        />
-        <textarea
-          placeholder="Поведение"
-          value={behavior}
-          onChange={(e) => setBehavior(e.target.value)}
-        />
-        <button type="submit">Сгенерировать упражнения</button>
-      </form>
+      <h2>Создание новой карточки</h2>
+      <label>Ситуация:</label>
+      <input value={situation} onChange={(e) => setSituation(e.target.value)} />
+      <br />
+
+      <label>Мысли:</label>
+      <input value={thoughts} onChange={(e) => setThoughts(e.target.value)} />
+      <br />
+
+      <label>Эмоции:</label>
+      <input value={emotions} onChange={(e) => setEmotions(e.target.value)} />
+      <br />
+
+      <label>Поведение:</label>
+      <input value={behavior} onChange={(e) => setBehavior(e.target.value)} />
+      <br />
+
+      <button onClick={handleGenerate} disabled={loading}>
+        {loading ? "Генерация..." : "Сгенерировать упражнения"}
+      </button>
+
+      {exercises.length > 0 && (
+        <>
+          <h3>Сгенерированные упражнения</h3>
+          {exercises.map((ex, i) => (
+            <div key={i}>
+              <h4>{ex.title}</h4>
+              <p><strong>Время:</strong> {ex.duration}</p>
+              <p>{ex.description}</p>
+              <p><em>{ex.instructions}</em></p>
+            </div>
+          ))}
+
+          <button onClick={handleSave}>Сохранить карточку</button>
+        </>
+      )}
 
       {error && <p style={{ color: "red" }}>{error}</p>}
-      {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
-
-      <div>
-        {exercises.map((exercise, index) => (
-          <div key={index}>
-            <h3>{exercise.title}</h3>
-            <p><strong>Время:</strong> {exercise.duration}</p>
-            <p>{exercise.description}</p>
-            <p><em>{exercise.instructions}</em></p>
-            <ul>
-              {exercise.steps.map((step, idx) => (
-                <li key={idx}>
-                  <strong>{step.stepTitle}:</strong> {step.stepDescription}
-                  {step.inputRequired && <em> (нужно ввести текст)</em>}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </div>
     </div>
   );
 };
