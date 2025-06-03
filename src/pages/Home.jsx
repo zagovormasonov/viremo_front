@@ -95,6 +95,7 @@ const styles = {
     bottom: 20,
     padding: '14px 28px',
     fontSize: '16px',
+    width: '100%',
     borderRadius: '12px',
     backgroundColor: 'rgb(45 124 242)',
     color: 'white',
