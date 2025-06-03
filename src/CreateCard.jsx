@@ -59,7 +59,7 @@ const CreateCard = () => {
       }
 
       // Переход к странице просмотра карточки
-      navigate("/card", { state: data });
+      navigate(`/card/${data.id}`);
 
     } catch (e) {
       console.error("Ошибка:", e);
