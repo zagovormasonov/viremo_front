@@ -92,7 +92,7 @@ const Home = () => {
       <h1 style={styles.header}>Сегодня</h1>
 
       <div style={styles.headerRow}>
-        <h2 style={styles.subheader}>Упражнения</h2>
+        <h2 style={styles.subheader}>Ситуации</h2>
         <div style={{ position: 'relative' }} ref={menuRef}>
           <button onClick={() => setMenuOpen(!menuOpen)} style={styles.menuButton}>
             ⋮
@@ -100,7 +100,7 @@ const Home = () => {
           {menuOpen && (
             <div style={styles.dropdownMenu}>
               <div style={styles.dropdownItem} onClick={() => setMenuOpen(false)}>
-                Опции (скоро)
+                Показать все
               </div>
             </div>
           )}
