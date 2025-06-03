@@ -1,20 +1,23 @@
 import React, { useState } from "react";
 import { supabase } from "./supabase";
-import { Input, Button, Form, Typography, Spin, Alert } from "antd";
+import { Input, Button, Form, Typography, Alert } from "antd";
+import { useNavigate } from "react-router-dom";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 
 const CreateCard = () => {
   const [form] = Form.useForm();
-  const [exercises, setExercises] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleGenerate = async (values) => {
     setLoading(true);
     setError("");
+
     try {
+      // Генерация упражнений
       const response = await fetch("https://viremos.onrender.com/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -23,44 +26,47 @@ const CreateCard = () => {
 
       const result = await response.json();
 
-      if (result.error) {
+      if (result.error || !result.result || result.result.length === 0) {
         setError("Ошибка генерации упражнений");
-        console.error(result.error);
-      } else {
-        setExercises(result.result);
+        setLoading(false);
+        return;
       }
+
+      // Получение текущего пользователя
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        setError("Не удалось получить текущего пользователя");
+        setLoading(false);
+        return;
+      }
+
+      // Сохранение карточки в Supabase
+      const { data, error: insertError } = await supabase
+        .from("cards")
+        .insert([{
+          ...values,
+          exercises: result.result,
+          user_id: user.id,
+        }])
+        .select()
+        .single(); // Получить вставленную карточку
+
+      if (insertError || !data) {
+        setError("Ошибка при сохранении карточки");
+        setLoading(false);
+        return;
+      }
+
+      // Переход к странице просмотра карточки
+      navigate("/card", { state: data });
+
     } catch (e) {
-      console.error("Ошибка при запросе:", e);
-      setError("Ошибка подключения к серверу");
+      console.error("Ошибка:", e);
+      setError("Ошибка при подключении к серверу");
     }
+
     setLoading(false);
-  };
-
-  const handleSave = async () => {
-    const values = form.getFieldsValue();
-
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      setError("Не удалось получить текущего пользователя");
-      return;
-    }
-
-    const { error: insertError } = await supabase.from("cards").insert([{
-      ...values,
-      exercises,
-      user_id: user.id,
-    }]);
-
-    if (insertError) {
-      console.error("Ошибка при сохранении карточки:", insertError);
-      setError("Ошибка при сохранении карточки");
-    } else {
-      alert("Карточка успешно сохранена!");
-      setError("");
-      form.resetFields();
-      setExercises([]);
-    }
   };
 
   return (
@@ -81,31 +87,14 @@ const CreateCard = () => {
           <TextArea rows={3} />
         </Form.Item>
 
+        {error && <Alert type="error" message={error} style={{ marginBottom: 16 }} />}
+
         <Form.Item>
           <Button type="primary" htmlType="submit" loading={loading} block>
-            Сгенерировать упражнения
+            Сгенерировать и сохранить
           </Button>
         </Form.Item>
       </Form>
-
-      {error && <Alert type="error" message={error} style={{ marginBottom: 16 }} />}
-
-      {exercises.length > 0 && (
-        <div style={{ marginTop: 24 }}>
-          <Title level={4}>Сгенерированные упражнения</Title>
-          {exercises.map((ex, i) => (
-            <div key={i} style={{ marginBottom: 16, padding: 16, border: "1px solid #eee", borderRadius: 8 }}>
-              <Text strong>{ex.title}</Text>
-              <p><strong>Время:</strong> {ex.duration}</p>
-              <p>{ex.description}</p>
-              <Text type="secondary">{ex.instructions}</Text>
-            </div>
-          ))}
-          <Button type="primary" onClick={handleSave} block>
-            Сохранить карточку
-          </Button>
-        </div>
-      )}
     </div>
   );
 };
