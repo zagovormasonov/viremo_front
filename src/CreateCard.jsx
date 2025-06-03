@@ -1,21 +1,19 @@
 import React, { useState } from "react";
-import { supabase } from "./supabase";
-import { useSession } from "@supabase/auth-helpers-react";
-import { useNavigate } from "react-router-dom";
+import { supabase } from "./supabase"; // путь может отличаться
 
 const CreateCard = () => {
-  const session = useSession();
-  const navigate = useNavigate();
-
   const [situation, setSituation] = useState("");
   const [thoughts, setThoughts] = useState("");
   const [emotions, setEmotions] = useState("");
   const [behavior, setBehavior] = useState("");
   const [exercises, setExercises] = useState([]);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setSuccessMessage("");
 
     try {
       const response = await fetch("https://viremos.onrender.com/", {
@@ -33,45 +31,44 @@ const CreateCard = () => {
 
       const data = await response.json();
 
-      if (response.ok) {
-        setExercises(data.result);
-        setError("");
+      if (!response.ok) {
+        throw new Error(data.error || "Ошибка генерации упражнений");
+      }
 
-        // Сохраняем карточку в Supabase
-       const { error: insertError } = await supabase.from("cards").insert([
+      const generatedExercises = data.result;
+
+      // Сохраняем карточку в Supabase
+      const { data: savedCard, error: saveError } = await supabase
+        .from("cards")
+        .insert([
           {
-            user_id: session.user.id,
             situation,
             thoughts,
             emotions,
             behavior,
+            exercises: generatedExercises, // если тип поля exercises = json
+            // если тип text, то JSON.stringify(generatedExercises)
           },
         ]);
 
-
-        if (insertError) {
-          console.error("Ошибка при сохранении карточки:", insertError.message);
-        } else {
-          console.log("✅ Карточка успешно сохранена в Supabase");
-        }
-
-      } else {
-        setError(data.error || "Ошибка генерации упражнений");
+      if (saveError) {
+        console.error("Ошибка при сохранении карточки:", saveError);
+        setError("Ошибка при сохранении карточки");
+        return;
       }
+
+      setExercises(generatedExercises);
+      setSuccessMessage("Карточка успешно создана!");
     } catch (err) {
       console.error("Ошибка:", err);
-      setError("Сервер недоступен или возникла ошибка.");
+      setError(err.message || "Сервер недоступен или возникла ошибка.");
     }
   };
 
-  if (!session) {
-    return <p>Пожалуйста, войдите в аккаунт</p>;
-  }
-
   return (
-    <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
+    <div>
       <h2>Создать карточку</h2>
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+      <form onSubmit={handleSubmit}>
         <textarea
           placeholder="Ситуация"
           value={situation}
@@ -96,10 +93,11 @@ const CreateCard = () => {
       </form>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
+      {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
 
-      <div style={{ marginTop: "20px" }}>
+      <div>
         {exercises.map((exercise, index) => (
-          <div key={index} style={{ marginBottom: "20px", padding: "10px", backgroundColor: "#f5f5f5", borderRadius: "8px" }}>
+          <div key={index}>
             <h3>{exercise.title}</h3>
             <p><strong>Время:</strong> {exercise.duration}</p>
             <p>{exercise.description}</p>
