@@ -1,9 +1,5 @@
 import React, { useState } from "react";
 import { supabase } from "./supabase";
-import { Input } from "./components/ui/input";
-import { Textarea } from "./components/ui/textarea";
-import { Button } from "./components/ui/button";
-import { Loader2 } from "lucide-react";
 
 const CreateCard = () => {
   const [situation, setSituation] = useState("");
@@ -70,92 +66,62 @@ const CreateCard = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Создание новой карточки</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Ситуация</label>
-            <Textarea
-              value={situation}
-              onChange={(e) => setSituation(e.target.value)}
-              placeholder="Опишите ситуацию..."
-              required
-            />
-          </div>
+    <div className="min-h-screen bg-gray-100 flex justify-center items-start p-6">
+      <div className="w-full max-w-3xl bg-white rounded-xl shadow-md p-8">
+        <h2 className="text-2xl font-bold mb-6 text-gray-800">Создание новой карточки</h2>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Мысли</label>
-            <Textarea
-              value={thoughts}
-              onChange={(e) => setThoughts(e.target.value)}
-              placeholder="Какие мысли у вас возникли?"
-              required
-            />
-          </div>
+        <div className="space-y-4">
+          <Input label="Ситуация" value={situation} onChange={setSituation} />
+          <Input label="Мысли" value={thoughts} onChange={setThoughts} />
+          <Input label="Эмоции" value={emotions} onChange={setEmotions} />
+          <Input label="Поведение" value={behavior} onChange={setBehavior} />
+        </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Эмоции</label>
-            <Textarea
-              value={emotions}
-              onChange={(e) => setEmotions(e.target.value)}
-              placeholder="Что вы чувствовали?"
-              required
-            />
-          </div>
+        <button
+          onClick={handleGenerate}
+          disabled={loading}
+          className="mt-6 w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
+        >
+          {loading ? "Генерация..." : "Сгенерировать упражнения"}
+        </button>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Поведение</label>
-            <Textarea
-              value={behavior}
-              onChange={(e) => setBehavior(e.target.value)}
-              placeholder="Как вы себя вели?"
-              required
-            />
-          </div>
-
-          <Button onClick={handleGenerate} disabled={loading} className="w-full">
-            {loading ? (
-              <>
-                <Loader2 className="animate-spin mr-2 w-4 h-4" />
-                Генерация...
-              </>
-            ) : (
-              "Сгенерировать упражнения"
-            )}
-          </Button>
-
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-        </CardContent>
-      </Card>
-
-      {exercises.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Сгенерированные упражнения</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        {exercises.length > 0 && (
+          <div className="mt-8 space-y-4">
+            <h3 className="text-xl font-semibold text-gray-700">Сгенерированные упражнения</h3>
             {exercises.map((ex, i) => (
-              <div key={i} className="p-4 border rounded-md bg-muted">
-                <h4 className="text-base font-semibold">{ex.title}</h4>
-                <p className="text-sm text-muted-foreground mb-1">
-                  <strong>Время:</strong> {ex.duration}
-                </p>
-                <p className="text-sm">{ex.description}</p>
-                <p className="text-xs italic text-muted-foreground mt-1">{ex.instructions}</p>
+              <div key={i} className="bg-gray-50 p-4 rounded-lg border">
+                <h4 className="font-semibold text-gray-800">{ex.title}</h4>
+                <p className="text-sm text-gray-500 mb-1"><strong>Время:</strong> {ex.duration}</p>
+                <p className="text-gray-700">{ex.description}</p>
+                <p className="text-sm italic text-gray-600 mt-1">{ex.instructions}</p>
               </div>
             ))}
-
-            <Button onClick={handleSave} className="w-full bg-green-600 hover:bg-green-700">
+            <button
+              onClick={handleSave}
+              className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition"
+            >
               Сохранить карточку
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+            </button>
+          </div>
+        )}
+
+        {error && <p className="text-red-500 mt-4">{error}</p>}
+      </div>
     </div>
   );
 };
+
+const Input = ({ label, value, onChange }) => (
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+    <textarea
+      rows={3}
+      className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      required
+    />
+  </div>
+);
 
 export default CreateCard;
