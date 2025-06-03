@@ -1,58 +1,104 @@
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { supabase } from "../supabase";
+import React, { useState } from "react";
+import { supabase } from "../supabase"; // путь может отличаться
 
-const CardDetail = () => {
-  const { id } = useParams();
-  const [card, setCard] = useState(null);
+const CreateCard = () => {
+  const [situation, setSituation] = useState("");
+  const [thoughts, setThoughts] = useState("");
+  const [emotions, setEmotions] = useState("");
+  const [behavior, setBehavior] = useState("");
+  const [exercises, setExercises] = useState([]);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
-  useEffect(() => {
-    const fetchCard = async () => {
-      const { data, error } = await supabase
-        .from("cards")
-        .select("*")
-        .eq("id", id)
-        .single();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccessMessage("");
 
-      if (error) {
-        setError("Ошибка загрузки карточки");
-        console.error(error);
-      } else {
-        // Преобразуем поле exercises из строки в объект, если нужно
-        const parsedExercises =
-          typeof data.exercises === "string"
-            ? JSON.parse(data.exercises)
-            : data.exercises;
+    try {
+      const response = await fetch("https://viremos.onrender.com/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          situation,
+          thoughts,
+          emotions,
+          behavior,
+        }),
+      });
 
-        setCard({ ...data, exercises: parsedExercises });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Ошибка генерации упражнений");
       }
-    };
 
-    fetchCard();
-  }, [id]);
+      const generatedExercises = data.result;
 
-  if (error) {
-    return <p style={{ color: "red" }}>{error}</p>;
-  }
+      // Сохраняем карточку в Supabase
+      const { data: savedCard, error: saveError } = await supabase
+        .from("cards")
+        .insert([
+          {
+            situation,
+            thoughts,
+            emotions,
+            behavior,
+            exercises: generatedExercises, // если тип поля exercises = json
+            // если тип text, то JSON.stringify(generatedExercises)
+          },
+        ]);
 
-  if (!card) {
-    return <p>Загрузка...</p>;
-  }
+      if (saveError) {
+        console.error("Ошибка при сохранении карточки:", saveError);
+        setError("Ошибка при сохранении карточки");
+        return;
+      }
+
+      setExercises(generatedExercises);
+      setSuccessMessage("Карточка успешно создана!");
+    } catch (err) {
+      console.error("Ошибка:", err);
+      setError(err.message || "Сервер недоступен или возникла ошибка.");
+    }
+  };
 
   return (
     <div>
-      <h2>Карточка #{card.id}</h2>
-      <p><strong>Ситуация:</strong> {card.situation}</p>
-      <p><strong>Мысли:</strong> {card.thoughts}</p>
-      <p><strong>Эмоции:</strong> {card.emotions}</p>
-      <p><strong>Поведение:</strong> {card.behavior}</p>
+      <h2>Создать карточку</h2>
+      <form onSubmit={handleSubmit}>
+        <textarea
+          placeholder="Ситуация"
+          value={situation}
+          onChange={(e) => setSituation(e.target.value)}
+        />
+        <textarea
+          placeholder="Мысли"
+          value={thoughts}
+          onChange={(e) => setThoughts(e.target.value)}
+        />
+        <textarea
+          placeholder="Эмоции"
+          value={emotions}
+          onChange={(e) => setEmotions(e.target.value)}
+        />
+        <textarea
+          placeholder="Поведение"
+          value={behavior}
+          onChange={(e) => setBehavior(e.target.value)}
+        />
+        <button type="submit">Сгенерировать упражнения</button>
+      </form>
 
-      <h3>Упражнения</h3>
-      {card.exercises && card.exercises.length > 0 ? (
-        card.exercises.map((exercise, index) => (
+      {error && <p style={{ color: "red" }}>{error}</p>}
+      {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
+
+      <div>
+        {exercises.map((exercise, index) => (
           <div key={index}>
-            <h4>{exercise.title}</h4>
+            <h3>{exercise.title}</h3>
             <p><strong>Время:</strong> {exercise.duration}</p>
             <p>{exercise.description}</p>
             <p><em>{exercise.instructions}</em></p>
@@ -65,12 +111,10 @@ const CardDetail = () => {
               ))}
             </ul>
           </div>
-        ))
-      ) : (
-        <p>Упражнения отсутствуют</p>
-      )}
+        ))}
+      </div>
     </div>
   );
 };
 
-export default CardDetail;
+export default CreateCard;
