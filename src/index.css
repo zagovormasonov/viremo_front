@@ -3,7 +3,10 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
+  color-scheme: light;
+  --bg-color: #ffffff;
+  --text-color: #000000;
+  --card-color: #f9f9f9;
   color: rgba(255, 255, 255, 0.87);
   background-color: #242424;
 
@@ -26,6 +29,8 @@ body {
   margin: 0;
   min-height: 100vh;
   margin-top: 50px;
+  background-color: var(--bg-color);
+  color: var(--text-color);
 }
 
 h1 {

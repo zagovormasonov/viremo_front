@@ -3,6 +3,9 @@
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+  --bg-color: #ffffff;
+  --text-color: #000000;
+  --card-color: #f9f9f9;
 }
 
 .logo {
