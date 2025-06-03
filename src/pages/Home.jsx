@@ -212,7 +212,7 @@ const styles = {
     fontSize: '28px',
     fontWeight: 'bold',
     marginBottom: 20,
-    color: 'white',
+    color: 'black',
   },
   headerRow: {
     display: 'flex',
@@ -222,7 +222,7 @@ const styles = {
   subheader: {
     fontSize: '22px',
     fontWeight: 'bold',
-    color: 'white',
+    color: 'black',
   },
   menuButton: {
     fontSize: '24px',

@@ -17,11 +17,11 @@ function TabBar() {
     <div style={{
       position: 'fixed', bottom: 0, left: 0, right: 0,
       display: 'flex', justifyContent: 'space-around',
-      padding: '1rem', backgroundColor: 'rgb(43 43 43)', zIndex: 1000,
+      padding: '1rem', backgroundColor: 'rgb(255 255 255)', zIndex: 1000,
     }}>
-      <Link to="/" style={{ color: location.pathname === '/' ? '#007AFF' : 'white' }}>Главная</Link>
-      <Link to="/profile" style={{ color: location.pathname === '/profile' ? '#007AFF' : 'white' }}>Трекеры</Link>
-      <Link to="/settings" style={{ color: location.pathname === '/settings' ? '#007AFF' : 'white' }}>Аналитика</Link>
+      <Link to="/" style={{ color: location.pathname === '/' ? '#007AFF' : 'black' }}>Главная</Link>
+      <Link to="/profile" style={{ color: location.pathname === '/profile' ? '#007AFF' : 'black' }}>Трекеры</Link>
+      <Link to="/settings" style={{ color: location.pathname === '/settings' ? '#007AFF' : 'black' }}>Аналитика</Link>
     </div>
   );
 }
@@ -32,7 +32,7 @@ function FixedHeader({ avatarUrl, onSignOut }) {
   return (
     <div style={{
       position: 'fixed', top: 0, left: 0, right: 0, height: 40,
-      backgroundColor: 'rgb(36 36 36)',
+      backgroundColor: 'rgb(255 255 255)',
       display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000,
     }}>
       {avatarUrl && (
