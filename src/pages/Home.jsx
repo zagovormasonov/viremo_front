@@ -85,11 +85,11 @@ const Home = () => {
           </button>
           {menuOpen && (
             <div style={styles.dropdownMenu}>
-              <div style={styles.dropdownItem} onClick={() => alert('Добавлено в избранное')}>
-                В избранное
+              <div style={styles.dropdownItem} onClick={() => alert('Изменить')}>
+                Изменить
               </div>
-              <div style={styles.dropdownItem} onClick={() => alert('Отправлено психологу')}>
-                Отправить психологу
+              <div style={styles.dropdownItem} onClick={() => alert('Сметреть все')}>
+                Сметреть все
               </div>
             </div>
           )}
