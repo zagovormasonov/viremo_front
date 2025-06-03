@@ -148,7 +148,8 @@ const Home = () => {
                 <div style={{ marginTop: 10 }}>
                   <Link to={`/card/${card.id}`}>
                     <Button
-                      type='primary'
+                      color='primary'
+                      variant="filled"
                       onClick={() => handleOpenCard(card.id)}
                     >
                       Открыть
@@ -157,7 +158,8 @@ const Home = () => {
 
                   {activeTab === 'archived' ? (
                     <Button
-                      type='primary'
+                      color='primary'
+                      variant="filled"
                       onClick={() => handleUnarchiveCard(card.id)}
                       
                     >
@@ -165,7 +167,8 @@ const Home = () => {
                     </Button>
                   ) : (
                     <Button
-                    type='danger'
+                    color='danger'
+                    variant="filled"
                       onClick={() => handleDelete(card.id)}
                     >
                       Удалить
@@ -193,7 +196,7 @@ const Home = () => {
       </AnimatePresence>
 
       <Link to="/create">
-        <button style={styles.generateButton}>Сгенерировать упражнения</button>
+        <Button color='primary' variant="filled">Сгенерировать упражнения</Button>
       </Link>
     </div>
   );
