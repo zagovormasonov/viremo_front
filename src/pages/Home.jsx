@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSession } from '@supabase/auth-helpers-react';
 import { supabase } from '../supabase';
 import { Link } from 'react-router-dom';
-import { motion, useAnimation } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 const Home = () => {
   const session = useSession();
@@ -12,7 +12,7 @@ const Home = () => {
   const menuRef = useRef();
 
   useEffect(() => {
-    if (session) fetchCards();
+    if (session?.user) fetchCards();
   }, [session]);
 
   useEffect(() => {
@@ -42,11 +42,8 @@ const Home = () => {
 
   const handleDelete = async (id) => {
     const { error } = await supabase.from('cards').delete().eq('id', id);
-    if (error) {
-      console.error('Ошибка при удалении карточки:', error.message);
-    } else {
-      fetchCards();
-    }
+    if (error) console.error('Ошибка при удалении карточки:', error.message);
+    else fetchCards();
   };
 
   const handleOpenCard = async (id) => {
@@ -54,12 +51,8 @@ const Home = () => {
       .from('cards')
       .update({ viewed: true })
       .eq('id', id);
-
-    if (error) {
-      console.error('Ошибка при обновлении карточки:', error.message);
-    } else {
-      fetchCards();
-    }
+    if (error) console.error('Ошибка при обновлении карточки:', error.message);
+    else fetchCards();
   };
 
   const handleArchiveCard = async (id) => {
@@ -67,12 +60,8 @@ const Home = () => {
       .from('cards')
       .update({ archived: true })
       .eq('id', id);
-
-    if (error) {
-      console.error('Ошибка при архивации:', error.message);
-    } else {
-      fetchCards();
-    }
+    if (error) console.error('Ошибка при архивации:', error.message);
+    else fetchCards();
   };
 
   const filteredCards =
@@ -80,15 +69,12 @@ const Home = () => {
       ? cards.filter((card) => !card.viewed)
       : cards.filter((card) => card.viewed);
 
-  if (!session) {
-    return <div>Пожалуйста, войдите в аккаунт</div>;
-  }
+  if (!session) return <div>Пожалуйста, войдите в аккаунт</div>;
 
   return (
     <div style={styles.container}>
       <h1 style={styles.header}>Сегодня</h1>
 
-      {/* Заголовок + Меню */}
       <div style={styles.headerRow}>
         <h2 style={styles.subheader}>Упражнения</h2>
         <div style={{ position: 'relative' }} ref={menuRef}>
@@ -100,10 +86,7 @@ const Home = () => {
           </button>
           {menuOpen && (
             <div style={styles.dropdownMenu}>
-              <div
-                style={styles.dropdownItem}
-                onClick={() => setMenuOpen(false)}
-              >
+              <div style={styles.dropdownItem} onClick={() => setMenuOpen(false)}>
                 Опции (скоро)
               </div>
               <div
@@ -120,7 +103,6 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Табы */}
       <div style={styles.tabs}>
         <button
           style={{
@@ -142,62 +124,49 @@ const Home = () => {
         </button>
       </div>
 
-      {/* Карточки */}
       <div style={{ marginTop: 20 }}>
         {filteredCards.length === 0 ? (
           <p style={{ color: 'white' }}>Нет карточек</p>
         ) : (
-          filteredCards.map((card) => {
-            const controls = useAnimation();
-
-            return (
-              <motion.div
-                key={card.id}
-                style={styles.cardWrapper}
-                drag="x"
-                dragConstraints={{ left: -100, right: 0 }}
-                onDragEnd={(_, info) => {
-                  if (info.offset.x < -80) {
-                    controls.start({ x: -120 });
-                  } else {
-                    controls.start({ x: 0 });
-                  }
-                }}
-                animate={controls}
-              >
-                <div style={styles.archiveBackground}>
+          filteredCards.map((card) => (
+            <motion.div
+              key={card.id}
+              style={styles.cardWrapper}
+              drag="x"
+              dragConstraints={{ left: -100, right: 0 }}
+              onDragEnd={(_, info) => {
+                if (info.offset.x < -80) {
+                  handleArchiveCard(card.id);
+                }
+              }}
+            >
+              <div style={styles.archiveBackground}>
+                <span style={styles.archiveButton}>← Архивировать</span>
+              </div>
+              <div style={styles.card}>
+                <p><strong>Ситуация:</strong> {card.situation}</p>
+                <p><strong>Мысли:</strong> {card.thoughts}</p>
+                <p><strong>Эмоции:</strong> {card.emotions}</p>
+                <p><strong>Поведение:</strong> {card.behavior}</p>
+                <div style={{ marginTop: 10 }}>
+                  <Link to={`/card/${card.id}`}>
+                    <button
+                      style={{ marginRight: 10 }}
+                      onClick={() => handleOpenCard(card.id)}
+                    >
+                      Открыть
+                    </button>
+                  </Link>
                   <button
-                    style={styles.archiveButton}
-                    onClick={() => handleArchiveCard(card.id)}
+                    onClick={() => handleDelete(card.id)}
+                    style={{ backgroundColor: '#f44336', color: 'white' }}
                   >
-                    Архивировать
+                    Удалить
                   </button>
                 </div>
-                <motion.div style={styles.card} drag="x" dragElastic={0.2}>
-                  <p><strong>Ситуация:</strong> {card.situation}</p>
-                  <p><strong>Мысли:</strong> {card.thoughts}</p>
-                  <p><strong>Эмоции:</strong> {card.emotions}</p>
-                  <p><strong>Поведение:</strong> {card.behavior}</p>
-                  <div style={{ marginTop: 10 }}>
-                    <Link to={`/card/${card.id}`}>
-                      <button
-                        style={{ marginRight: 10 }}
-                        onClick={() => handleOpenCard(card.id)}
-                      >
-                        Открыть
-                      </button>
-                    </Link>
-                    <button
-                      onClick={() => handleDelete(card.id)}
-                      style={{ backgroundColor: '#f44336', color: 'white' }}
-                    >
-                      Удалить
-                    </button>
-                  </div>
-                </motion.div>
-              </motion.div>
-            );
-          })
+              </div>
+            </motion.div>
+          ))
         )}
       </div>
 
@@ -289,11 +258,9 @@ const styles = {
     zIndex: 1,
   },
   archiveButton: {
-    background: 'transparent',
     color: 'white',
-    border: 'none',
     fontWeight: 'bold',
-    cursor: 'pointer',
+    fontSize: 12,
   },
   card: {
     padding: 20,
