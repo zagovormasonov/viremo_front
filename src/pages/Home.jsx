@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSession } from '@supabase/auth-helpers-react';
 import { supabase } from '../supabase';
 import { Link } from 'react-router-dom';
-import { motion, useMotionValue, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 const Home = () => {
   const session = useSession();
@@ -101,88 +101,83 @@ const Home = () => {
       </div>
 
       <div style={styles.tabs}>
-        {['new', 'completed', 'archived'].map((tab) => (
-          <button
-            key={tab}
-            style={{
-              ...styles.tabButton,
-              backgroundColor: activeTab === tab ? '#333' : '#222',
-            }}
-            onClick={() => setActiveTab(tab)}
-          >
-            {tab === 'new' ? 'Новые' : tab === 'completed' ? 'Завершённые' : 'Архив'}
-          </button>
-        ))}
+        <button
+          style={{ ...styles.tabButton, backgroundColor: activeTab === 'new' ? '#333' : '#222' }}
+          onClick={() => setActiveTab('new')}
+        >
+          Новые
+        </button>
+        <button
+          style={{ ...styles.tabButton, backgroundColor: activeTab === 'completed' ? '#333' : '#222' }}
+          onClick={() => setActiveTab('completed')}
+        >
+          Завершённые
+        </button>
+        <button
+          style={{ ...styles.tabButton, backgroundColor: activeTab === 'archived' ? '#333' : '#222' }}
+          onClick={() => setActiveTab('archived')}
+        >
+          Архив
+        </button>
       </div>
 
       <div style={{ marginTop: 20 }}>
         {cards.length === 0 ? (
           <p style={{ color: 'white' }}>Нет карточек</p>
         ) : (
-          cards.map((card) => {
-            const x = useMotionValue(0);
-            const opacity = useTransform(x, [-100, -50], [1, 0], { clamp: true });
+          cards.map((card) => (
+            <motion.div
+              key={card.id}
+              style={styles.cardWrapper}
+              drag={activeTab !== 'archived' ? 'x' : false}
+              dragConstraints={{ left: -100, right: 0 }}
+              onDragEnd={(_, info) => {
+                if (info.offset.x < -80 && activeTab !== 'archived') {
+                  handleArchiveCard(card.id);
+                }
+              }}
+            >
+              {activeTab !== 'archived' && (
+                <div style={styles.archiveBackground}>
+                  <span style={styles.archiveButton}>← Архивировать</span>
+                </div>
+              )}
 
-            return (
-              <div key={card.id} style={styles.cardWrapper}>
-                {activeTab !== 'archived' && (
-                  <motion.div
-                    style={{
-                      ...styles.archiveBackground,
-                      opacity,
-                    }}
-                  >
-                    <span style={styles.archiveButton}>← Архивировать</span>
-                  </motion.div>
-                )}
+              <div style={styles.card}>
+                <p><strong>Ситуация:</strong> {card.situation}</p>
+                <p><strong>Мысли:</strong> {card.thoughts}</p>
+                <p><strong>Эмоции:</strong> {card.emotions}</p>
+                <p><strong>Поведение:</strong> {card.behavior}</p>
 
-                <motion.div
-                  style={{ x }}
-                  drag={activeTab !== 'archived' ? 'x' : false}
-                  dragConstraints={{ left: -120, right: 0 }}
-                  onDragEnd={(_, info) => {
-                    if (info.offset.x < -80 && activeTab !== 'archived') {
-                      handleArchiveCard(card.id);
-                    }
-                  }}
-                >
-                  <div style={styles.card}>
-                    <p><strong>Ситуация:</strong> {card.situation}</p>
-                    <p><strong>Мысли:</strong> {card.thoughts}</p>
-                    <p><strong>Эмоции:</strong> {card.emotions}</p>
-                    <p><strong>Поведение:</strong> {card.behavior}</p>
+                <div style={{ marginTop: 10 }}>
+                  <Link to={`/card/${card.id}`}>
+                    <button
+                      style={{ marginRight: 10 }}
+                      onClick={() => handleOpenCard(card.id)}
+                    >
+                      Открыть
+                    </button>
+                  </Link>
 
-                    <div style={{ marginTop: 10 }}>
-                      <Link to={`/card/${card.id}`}>
-                        <button
-                          style={{ marginRight: 10 }}
-                          onClick={() => handleOpenCard(card.id)}
-                        >
-                          Открыть
-                        </button>
-                      </Link>
-
-                      {activeTab === 'archived' ? (
-                        <button
-                          onClick={() => handleUnarchiveCard(card.id)}
-                          style={{ backgroundColor: '#4caf50', color: 'white' }}
-                        >
-                          Вернуть
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => handleDelete(card.id)}
-                          style={{ backgroundColor: '#f44336', color: 'white' }}
-                        >
-                          Удалить
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </motion.div>
+                  {activeTab === 'archived' ? (
+                    <button
+                      onClick={() => handleUnarchiveCard(card.id)}
+                      style={{ backgroundColor: '#4caf50', color: 'white' }}
+                    >
+                      Вернуть
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleDelete(card.id)}
+                      style={{ backgroundColor: '#f44336', color: 'white' }}
+                    >
+                      Удалить
+                    </button>
+                  )}
+                </div>
               </div>
-            );
-          })
+            </motion.div>
+          ))
         )}
       </div>
 
@@ -272,7 +267,6 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 1,
-    pointerEvents: 'none',
   },
   archiveButton: {
     color: 'white',
