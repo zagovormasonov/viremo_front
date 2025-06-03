@@ -102,7 +102,7 @@ const CreateCard = () => {
         <>
           <h3>Сгенерированные упражнения</h3>
           {exercises.map((ex, i) => (
-            <div key={i}>
+            <div style={{padding: 20, background: 'rgb(51, 50, 50)'}} key={i}>
               <h4>{ex.title}</h4>
               <p><strong>Время:</strong> {ex.duration}</p>
               <p>{ex.description}</p>
