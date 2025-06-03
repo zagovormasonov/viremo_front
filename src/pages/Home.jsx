@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 const Home = () => {
   const session = useSession();
   const [cards, setCards] = useState([]);
+  const [activeTab, setActiveTab] = useState('new');
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef();
 
@@ -46,6 +47,24 @@ const Home = () => {
     }
   };
 
+  const handleOpenCard = async (id) => {
+    const { error } = await supabase
+      .from('cards')
+      .update({ viewed: true })
+      .eq('id', id);
+
+    if (error) {
+      console.error('Ошибка при обновлении карточки:', error.message);
+    } else {
+      fetchCards();
+    }
+  };
+
+  const filteredCards =
+    activeTab === 'new'
+      ? cards.filter((card) => !card.viewed)
+      : cards.filter((card) => card.viewed);
+
   if (!session) {
     return <div>Пожалуйста, войдите в аккаунт</div>;
   }
@@ -77,24 +96,56 @@ const Home = () => {
         </div>
       </div>
 
+      {/* Табы */}
+      <div style={styles.tabs}>
+        <button
+          style={{
+            ...styles.tabButton,
+            backgroundColor: activeTab === 'new' ? '#333' : '#222',
+          }}
+          onClick={() => setActiveTab('new')}
+        >
+          Новые
+        </button>
+        <button
+          style={{
+            ...styles.tabButton,
+            backgroundColor: activeTab === 'completed' ? '#333' : '#222',
+          }}
+          onClick={() => setActiveTab('completed')}
+        >
+          Завершённые
+        </button>
+      </div>
+
+      {/* Карточки */}
       <div style={{ marginTop: 20 }}>
-        {cards.map((card) => (
-          <div key={card.id} style={styles.card}>
-            <p><strong>Ситуация:</strong> {card.situation}</p>
-            <p><strong>Мысли:</strong> {card.thoughts}</p>
-            <p><strong>Эмоции:</strong> {card.emotions}</p>
-            <p><strong>Поведение:</strong> {card.behavior}</p>
-            <Link to={`/card/${card.id}`}>
-              <button style={{ marginRight: 10 }}>Открыть</button>
-            </Link>
-            <button
-              onClick={() => handleDelete(card.id)}
-              style={{ backgroundColor: '#f44336', color: 'white' }}
-            >
-              Удалить
-            </button>
-          </div>
-        ))}
+        {filteredCards.length === 0 ? (
+          <p style={{ color: 'white' }}>Нет карточек</p>
+        ) : (
+          filteredCards.map((card) => (
+            <div key={card.id} style={styles.card}>
+              <p><strong>Ситуация:</strong> {card.situation}</p>
+              <p><strong>Мысли:</strong> {card.thoughts}</p>
+              <p><strong>Эмоции:</strong> {card.emotions}</p>
+              <p><strong>Поведение:</strong> {card.behavior}</p>
+              <Link to={`/card/${card.id}`}>
+                <button
+                  style={{ marginRight: 10 }}
+                  onClick={() => handleOpenCard(card.id)}
+                >
+                  Открыть
+                </button>
+              </Link>
+              <button
+                onClick={() => handleDelete(card.id)}
+                style={{ backgroundColor: '#f44336', color: 'white' }}
+              >
+                Удалить
+              </button>
+            </div>
+          ))
+        )}
       </div>
 
       <Link to="/create">
@@ -150,6 +201,20 @@ const styles = {
     cursor: 'pointer',
     borderBottom: '1px solid #444',
   },
+  tabs: {
+    display: 'flex',
+    marginTop: 10,
+    gap: 10,
+  },
+  tabButton: {
+    flex: 1,
+    padding: 10,
+    border: 'none',
+    borderRadius: 10,
+    color: 'white',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+  },
   card: {
     padding: 20,
     marginBottom: 10,
@@ -168,6 +233,7 @@ const styles = {
     border: 'none',
     cursor: 'pointer',
     zIndex: 1000,
+    marginTop: 20,
   },
 };
 
