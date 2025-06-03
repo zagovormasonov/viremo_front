@@ -2,13 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSession } from '@supabase/auth-helpers-react';
 import { supabase } from '../supabase';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Home = () => {
   const session = useSession();
   const [cards, setCards] = useState([]);
   const [activeTab, setActiveTab] = useState('new');
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showArchiveMessage, setShowArchiveMessage] = useState(false);
   const menuRef = useRef();
 
   useEffect(() => {
@@ -66,7 +67,11 @@ const Home = () => {
       .update({ archived: true })
       .eq('id', id);
     if (error) console.error('Ошибка при архивации:', error.message);
-    else fetchCards();
+    else {
+      fetchCards();
+      setShowArchiveMessage(true);
+      setTimeout(() => setShowArchiveMessage(false), 2000);
+    }
   };
 
   const handleUnarchiveCard = async (id) => {
@@ -181,6 +186,20 @@ const Home = () => {
         )}
       </div>
 
+      <AnimatePresence>
+        {showArchiveMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 30 }}
+            transition={{ duration: 0.5 }}
+            style={styles.archiveMessage}
+          >
+            Карточка перемещена в раздел Архив
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <Link to="/create">
         <button style={styles.generateButton}>Сгенерировать упражнения</button>
       </Link>
@@ -294,6 +313,18 @@ const styles = {
     cursor: 'pointer',
     zIndex: 1000,
     marginTop: 20,
+  },
+  archiveMessage: {
+    position: 'fixed',
+    bottom: 100,
+    left: '50%',
+    transform: 'translateX(-50%)',
+    backgroundColor: '#444',
+    color: 'white',
+    padding: '12px 24px',
+    borderRadius: 12,
+    zIndex: 2000,
+    fontWeight: 'bold',
   },
 };
 
