@@ -3,6 +3,7 @@ import { useSession } from '@supabase/auth-helpers-react';
 import { supabase } from '../supabase';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Tabs } from 'antd'; // в начале файла
 
 const Home = () => {
   const session = useSession();
@@ -105,26 +106,16 @@ const Home = () => {
         </div>
       </div>
 
-      <div style={styles.tabs}>
-        <button
-          style={{ ...styles.tabButton, backgroundColor: activeTab === 'new' ? '#333' : '#222' }}
-          onClick={() => setActiveTab('new')}
-        >
-          Новые
-        </button>
-        <button
-          style={{ ...styles.tabButton, backgroundColor: activeTab === 'completed' ? '#333' : '#222' }}
-          onClick={() => setActiveTab('completed')}
-        >
-          Завершённые
-        </button>
-        <button
-          style={{ ...styles.tabButton, backgroundColor: activeTab === 'archived' ? '#333' : '#222' }}
-          onClick={() => setActiveTab('archived')}
-        >
-          Архив
-        </button>
-      </div>
+      <Tabs
+        defaultActiveKey="new"
+        activeKey={activeTab}
+        onChange={(key) => setActiveTab(key)}
+        items={[
+          { key: 'new', label: 'Новые' },
+          { key: 'completed', label: 'Завершённые' },
+          { key: 'archived', label: 'Архив' },
+        ]}
+      />
 
       <div style={{ marginTop: 20 }}>
         {cards.length === 0 ? (
