@@ -234,7 +234,7 @@ const styles = {
     background: 'transparent',
     border: 'none',
     cursor: 'pointer',
-    color: 'white',
+    color: '#1677ff',
   },
   dropdownMenu: {
     position: 'absolute',
