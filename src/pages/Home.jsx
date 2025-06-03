@@ -41,6 +41,7 @@ const Home = () => {
   return (
     <div style={styles.container}>
       <h1 style={styles.header}>Сегодня</h1>
+      <h2 style={styles.header}>Упражнения</h2>
 
       <div style={{ marginTop: 20 }}>
         {cards.map((card) => (
