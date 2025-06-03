@@ -13,7 +13,7 @@ const Home = () => {
 
   useEffect(() => {
     if (session?.user) fetchCards();
-  }, [session]);
+  }, [session, activeTab]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -26,18 +26,23 @@ const Home = () => {
   }, []);
 
   const fetchCards = async () => {
-    const { data, error } = await supabase
+    let query = supabase
       .from('cards')
       .select('*')
       .eq('user_id', session.user.id)
-      .eq('archived', false)
       .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Ошибка загрузки карточек:', error.message);
+    if (activeTab === 'archived') {
+      query = query.eq('archived', true);
     } else {
-      setCards(data);
+      query = query.eq('archived', false);
+      if (activeTab === 'new') query = query.eq('viewed', false);
+      if (activeTab === 'completed') query = query.eq('viewed', true);
     }
+
+    const { data, error } = await query;
+    if (error) console.error('Ошибка загрузки карточек:', error.message);
+    else setCards(data);
   };
 
   const handleDelete = async (id) => {
@@ -64,10 +69,14 @@ const Home = () => {
     else fetchCards();
   };
 
-  const filteredCards =
-    activeTab === 'new'
-      ? cards.filter((card) => !card.viewed)
-      : cards.filter((card) => card.viewed);
+  const handleUnarchiveCard = async (id) => {
+    const { error } = await supabase
+      .from('cards')
+      .update({ archived: false })
+      .eq('id', id);
+    if (error) console.error('Ошибка при восстановлении:', error.message);
+    else fetchCards();
+  };
 
   if (!session) return <div>Пожалуйста, войдите в аккаунт</div>;
 
@@ -78,25 +87,13 @@ const Home = () => {
       <div style={styles.headerRow}>
         <h2 style={styles.subheader}>Упражнения</h2>
         <div style={{ position: 'relative' }} ref={menuRef}>
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            style={styles.menuButton}
-          >
+          <button onClick={() => setMenuOpen(!menuOpen)} style={styles.menuButton}>
             ⋮
           </button>
           {menuOpen && (
             <div style={styles.dropdownMenu}>
               <div style={styles.dropdownItem} onClick={() => setMenuOpen(false)}>
                 Опции (скоро)
-              </div>
-              <div
-                style={styles.dropdownItem}
-                onClick={() => {
-                  setActiveTab('completed');
-                  setMenuOpen(false);
-                }}
-              >
-                Завершённые
               </div>
             </div>
           )}
@@ -105,49 +102,53 @@ const Home = () => {
 
       <div style={styles.tabs}>
         <button
-          style={{
-            ...styles.tabButton,
-            backgroundColor: activeTab === 'new' ? '#333' : '#222',
-          }}
+          style={{ ...styles.tabButton, backgroundColor: activeTab === 'new' ? '#333' : '#222' }}
           onClick={() => setActiveTab('new')}
         >
           Новые
         </button>
         <button
-          style={{
-            ...styles.tabButton,
-            backgroundColor: activeTab === 'completed' ? '#333' : '#222',
-          }}
+          style={{ ...styles.tabButton, backgroundColor: activeTab === 'completed' ? '#333' : '#222' }}
           onClick={() => setActiveTab('completed')}
         >
           Завершённые
         </button>
+        <button
+          style={{ ...styles.tabButton, backgroundColor: activeTab === 'archived' ? '#333' : '#222' }}
+          onClick={() => setActiveTab('archived')}
+        >
+          Архив
+        </button>
       </div>
 
       <div style={{ marginTop: 20 }}>
-        {filteredCards.length === 0 ? (
+        {cards.length === 0 ? (
           <p style={{ color: 'white' }}>Нет карточек</p>
         ) : (
-          filteredCards.map((card) => (
+          cards.map((card) => (
             <motion.div
               key={card.id}
               style={styles.cardWrapper}
-              drag="x"
+              drag={activeTab !== 'archived' ? 'x' : false}
               dragConstraints={{ left: -100, right: 0 }}
               onDragEnd={(_, info) => {
-                if (info.offset.x < -80) {
+                if (info.offset.x < -80 && activeTab !== 'archived') {
                   handleArchiveCard(card.id);
                 }
               }}
             >
-              <div style={styles.archiveBackground}>
-                <span style={styles.archiveButton}>← Архивировать</span>
-              </div>
+              {activeTab !== 'archived' && (
+                <div style={styles.archiveBackground}>
+                  <span style={styles.archiveButton}>← Архивировать</span>
+                </div>
+              )}
+
               <div style={styles.card}>
                 <p><strong>Ситуация:</strong> {card.situation}</p>
                 <p><strong>Мысли:</strong> {card.thoughts}</p>
                 <p><strong>Эмоции:</strong> {card.emotions}</p>
                 <p><strong>Поведение:</strong> {card.behavior}</p>
+
                 <div style={{ marginTop: 10 }}>
                   <Link to={`/card/${card.id}`}>
                     <button
@@ -157,12 +158,22 @@ const Home = () => {
                       Открыть
                     </button>
                   </Link>
-                  <button
-                    onClick={() => handleDelete(card.id)}
-                    style={{ backgroundColor: '#f44336', color: 'white' }}
-                  >
-                    Удалить
-                  </button>
+
+                  {activeTab === 'archived' ? (
+                    <button
+                      onClick={() => handleUnarchiveCard(card.id)}
+                      style={{ backgroundColor: '#4caf50', color: 'white' }}
+                    >
+                      Вернуть
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleDelete(card.id)}
+                      style={{ backgroundColor: '#f44336', color: 'white' }}
+                    >
+                      Удалить
+                    </button>
+                  )}
                 </div>
               </div>
             </motion.div>
@@ -172,9 +183,6 @@ const Home = () => {
 
       <Link to="/create">
         <button style={styles.generateButton}>Сгенерировать упражнения</button>
-      </Link>
-      <Link to="/archived" style={styles.dropdownItem}>
-        Архив
       </Link>
     </div>
   );
