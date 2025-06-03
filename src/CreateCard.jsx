@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { supabase } from "./supabase";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
+import { Input } from "./components/ui/input";
+import { Textarea } from "./components/ui/textarea";
+import { Button } from "./components/ui/button";
 import { Loader2 } from "lucide-react";
 
 const CreateCard = () => {
