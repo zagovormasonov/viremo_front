@@ -71,7 +71,6 @@ const Home = () => {
 
 const styles = {
   container: {
-    padding: 20,
     maxWidth: 800,
     margin: '0 auto',
     position: 'relative',
@@ -96,7 +95,7 @@ const styles = {
     padding: '14px 28px',
     fontSize: '16px',
     borderRadius: '12px',
-    backgroundColor: '#4caf50',
+    backgroundColor: 'rgb(45 124 242)',
     color: 'white',
     border: 'none',
     cursor: 'pointer',
