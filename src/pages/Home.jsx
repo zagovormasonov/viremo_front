@@ -42,7 +42,7 @@ const Home = () => {
     <div style={styles.container}>
       <h1 style={styles.header}>Сегодня</h1>
 
-      <div style={{ marginTop: 40 }}>
+      <div style={{ marginTop: 20 }}>
         {cards.map((card) => (
           <div key={card.id} style={styles.card}>
             <p><strong>Ситуация:</strong> {card.situation}</p>
