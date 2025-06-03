@@ -1,108 +1,136 @@
-import React, { useState, useEffect } from 'react';
-import { useSession } from '@supabase/auth-helpers-react';
-import { supabase } from '../supabase';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from "react";
+import { supabase } from "../supabase";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
-  const session = useSession();
   const [cards, setCards] = useState([]);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (session) fetchCards();
-  }, [session]);
+    const fetchCards = async () => {
+      const { data, error } = await supabase.from("cards").select("*");
+      if (!error) {
+        setCards(data);
+      }
+    };
 
-  const fetchCards = async () => {
-    const { data, error } = await supabase
-      .from('cards')
-      .select('*')
-      .eq('user_id', session.user.id)
-      .order('created_at', { ascending: false });
+    fetchCards();
+  }, []);
 
-    if (error) {
-      console.error('Ошибка загрузки карточек:', error.message);
-    } else {
-      setCards(data);
-    }
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleGenerate = () => {
+    navigate("/new-card");
   };
-
-  const handleDelete = async (id) => {
-    const { error } = await supabase.from('cards').delete().eq('id', id);
-    if (error) {
-      console.error('Ошибка при удалении карточки:', error.message);
-    } else {
-      fetchCards();
-    }
-  };
-
-  if (!session) {
-    return <div>Пожалуйста, войдите в аккаунт</div>;
-  }
 
   return (
-    <div style={styles.container}>
-      <h1 style={styles.header}>Сегодня</h1>
-      <h2 style={styles.subheader}>Упражнения</h2>
-
-      <div style={{ marginTop: 20 }}>
-        {cards.map((card) => (
-          <div key={card.id} style={styles.card}>
-            <p><strong>Ситуация:</strong> {card.situation}</p>
-            <p><strong>Мысли:</strong> {card.thoughts}</p>
-            <p><strong>Эмоции:</strong> {card.emotions}</p>
-            <p><strong>Поведение:</strong> {card.behavior}</p>
-            <Link to={`/card/${card.id}`}>
-              <button style={{ marginRight: 10 }}>Открыть</button>
-            </Link>
-            <button
-              onClick={() => handleDelete(card.id)}
-              style={{ backgroundColor: '#f44336', color: 'white' }}
+    <div style={{ padding: "1rem", position: "relative" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "1rem",
+        }}
+      >
+        <h2>Упражнения</h2>
+        <div style={{ position: "relative" }} ref={menuRef}>
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            style={{
+              fontSize: "24px",
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+            }}
+          >
+            ⋮
+          </button>
+          {menuOpen && (
+            <div
+              style={{
+                position: "absolute",
+                top: "30px",
+                right: 0,
+                background: "white",
+                border: "1px solid #ccc",
+                borderRadius: "8px",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+              }}
             >
-              Удалить
-            </button>
-          </div>
-        ))}
+              <ul style={{ listStyle: "none", margin: 0, padding: "8px 0" }}>
+                <li
+                  style={{ padding: "8px 16px", cursor: "pointer" }}
+                  onClick={() => alert("Добавлено в избранное")}
+                >
+                  В избранное
+                </li>
+                <li
+                  style={{ padding: "8px 16px", cursor: "pointer" }}
+                  onClick={() => alert("Отправлено психологу")}
+                >
+                  Отправить психологу
+                </li>
+              </ul>
+            </div>
+          )}
+        </div>
       </div>
 
-      <Link to="/create">
-        <button style={styles.generateButton}>Сгенерировать упражнения</button>
-      </Link>
+      {/* Список карточек */}
+      {cards.length > 0 ? (
+        cards.map((card) => (
+          <div
+            key={card.id}
+            style={{
+              padding: "1rem",
+              marginBottom: "1rem",
+              border: "1px solid #ccc",
+              borderRadius: "8px",
+              cursor: "pointer",
+            }}
+            onClick={() => navigate(`/card/${card.id}`)}
+          >
+            <p><strong>Ситуация:</strong> {card.situation}</p>
+            <p><strong>Эмоции:</strong> {card.emotions}</p>
+          </div>
+        ))
+      ) : (
+        <p>У вас пока нет карточек</p>
+      )}
+
+      {/* Кнопка "+" снизу справа */}
+      <button
+        onClick={handleGenerate}
+        style={{
+          position: "fixed",
+          right: "24px",
+          bottom: "24px",
+          width: "56px",
+          height: "56px",
+          borderRadius: "50%",
+          backgroundColor: "#1976d2",
+          color: "white",
+          fontSize: "32px",
+          border: "none",
+          cursor: "pointer",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+        }}
+      >
+        +
+      </button>
     </div>
   );
-};
-
-const styles = {
-  container: {
-    maxWidth: 800,
-    margin: '0 auto',
-    position: 'relative',
-    minHeight: '100vh',
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  header: {
-    fontSize: '28px',
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  card: {
-    padding: 20,
-    marginBottom: 10,
-    borderRadius: 20,
-    backgroundColor: 'rgb(51 50 50)',
-    color: 'white',
-  },
-  generateButton: {
-    bottom: 20,
-    padding: '14px 28px',
-    fontSize: '16px',
-    width: '100%',
-    borderRadius: '12px',
-    backgroundColor: 'rgb(45 124 242)',
-    color: 'white',
-    border: 'none',
-    cursor: 'pointer',
-    zIndex: 1000,
-  },
 };
 
 export default Home;
