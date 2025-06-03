@@ -65,7 +65,7 @@ const CardDetails = () => {
               padding: "20px",
               marginBottom: "10px",
               borderRadius: "20px",
-              background: "rgb(49 49 49)"
+              background: "rgb(239 245 255)"
             }}
           >
             <h4>{exercise.title}</h4>
