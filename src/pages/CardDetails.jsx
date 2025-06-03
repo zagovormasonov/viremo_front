@@ -6,39 +6,47 @@ const CardDetails = () => {
   const { id } = useParams();
   const [card, setCard] = useState(null);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchCard = async () => {
-      const { data, error } = await supabase
-        .from("cards")
-        .select("*")
-        .eq("id", id)
-        .single();
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from("cards")
+          .select("id, situation, thoughts, emotions, behavior, exercises")
+          .eq("id", id)
+          .single();
 
-      if (error) {
-        setError("Ошибка загрузки карточки");
-        console.error(error);
-      } else {
-        // Преобразуем поле exercises из строки в объект, если нужно
-        const parsedExercises =
-          typeof data.exercises === "string"
-            ? JSON.parse(data.exercises)
-            : data.exercises;
+        if (error) throw error;
+
+        // Преобразование поля exercises, если оно строка
+        let parsedExercises = null;
+        if (typeof data.exercises === "string") {
+          try {
+            parsedExercises = JSON.parse(data.exercises);
+          } catch (e) {
+            console.error("Ошибка парсинга exercises:", e);
+          }
+        } else {
+          parsedExercises = data.exercises;
+        }
 
         setCard({ ...data, exercises: parsedExercises });
+      } catch (err) {
+        console.error("Ошибка загрузки карточки:", err);
+        setError("Ошибка загрузки карточки");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchCard();
   }, [id]);
 
-  if (error) {
-    return <p style={{ color: "red" }}>{error}</p>;
-  }
-
-  if (!card) {
-    return <p>Загрузка...</p>;
-  }
+  if (loading) return <p>Загрузка...</p>;
+  if (error) return <p style={{ color: "red" }}>{error}</p>;
+  if (!card) return <p>Карточка не найдена</p>;
 
   return (
     <div>
@@ -49,9 +57,18 @@ const CardDetails = () => {
       <p><strong>Поведение:</strong> {card.behavior}</p>
 
       <h3>Упражнения</h3>
-      {card.exercises && card.exercises.length > 0 ? (
+      {Array.isArray(card.exercises) && card.exercises.length > 0 ? (
         card.exercises.map((exercise, index) => (
-          <div key={index}>
+          <div
+            key={index}
+            style={{
+              border: "1px solid #ccc",
+              padding: "10px",
+              marginBottom: "10px",
+              borderRadius: "8px",
+              background: "#f9f9f9"
+            }}
+          >
             <h4>{exercise.title}</h4>
             <p><strong>Время:</strong> {exercise.duration}</p>
             <p>{exercise.description}</p>
