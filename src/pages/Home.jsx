@@ -2,13 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSession } from '@supabase/auth-helpers-react';
 import { supabase } from '../supabase';
 import { Link } from 'react-router-dom';
+import { motion, useAnimation } from 'framer-motion';
 
 const Home = () => {
   const session = useSession();
   const [cards, setCards] = useState([]);
   const [activeTab, setActiveTab] = useState('new');
   const [menuOpen, setMenuOpen] = useState(false);
-  const [editMode, setEditMode] = useState(false);
   const menuRef = useRef();
 
   useEffect(() => {
@@ -102,12 +102,9 @@ const Home = () => {
             <div style={styles.dropdownMenu}>
               <div
                 style={styles.dropdownItem}
-                onClick={() => {
-                  setEditMode(!editMode);
-                  setMenuOpen(false);
-                }}
+                onClick={() => setMenuOpen(false)}
               >
-                {editMode ? 'Завершить редактирование' : 'Изменить'}
+                Опции (скоро)
               </div>
               <div
                 style={styles.dropdownItem}
@@ -116,7 +113,7 @@ const Home = () => {
                   setMenuOpen(false);
                 }}
               >
-                Сметреть все
+                Завершённые
               </div>
             </div>
           )}
@@ -150,39 +147,57 @@ const Home = () => {
         {filteredCards.length === 0 ? (
           <p style={{ color: 'white' }}>Нет карточек</p>
         ) : (
-          filteredCards.map((card) => (
-            <div key={card.id} style={styles.card}>
-              <p><strong>Ситуация:</strong> {card.situation}</p>
-              <p><strong>Мысли:</strong> {card.thoughts}</p>
-              <p><strong>Эмоции:</strong> {card.emotions}</p>
-              <p><strong>Поведение:</strong> {card.behavior}</p>
-              {editMode ? (
-                <button
-                  onClick={() => handleArchiveCard(card.id)}
-                  style={{ backgroundColor: '#ffa500', color: 'white', marginTop: 10 }}
-                >
-                  Архивировать
-                </button>
-              ) : (
-                <div style={{ marginTop: 10 }}>
-                  <Link to={`/card/${card.id}`}>
-                    <button
-                      style={{ marginRight: 10 }}
-                      onClick={() => handleOpenCard(card.id)}
-                    >
-                      Открыть
-                    </button>
-                  </Link>
+          filteredCards.map((card) => {
+            const controls = useAnimation();
+
+            return (
+              <motion.div
+                key={card.id}
+                style={styles.cardWrapper}
+                drag="x"
+                dragConstraints={{ left: -100, right: 0 }}
+                onDragEnd={(_, info) => {
+                  if (info.offset.x < -80) {
+                    controls.start({ x: -120 });
+                  } else {
+                    controls.start({ x: 0 });
+                  }
+                }}
+                animate={controls}
+              >
+                <div style={styles.archiveBackground}>
                   <button
-                    onClick={() => handleDelete(card.id)}
-                    style={{ backgroundColor: '#f44336', color: 'white' }}
+                    style={styles.archiveButton}
+                    onClick={() => handleArchiveCard(card.id)}
                   >
-                    Удалить
+                    Архивировать
                   </button>
                 </div>
-              )}
-            </div>
-          ))
+                <motion.div style={styles.card} drag="x" dragElastic={0.2}>
+                  <p><strong>Ситуация:</strong> {card.situation}</p>
+                  <p><strong>Мысли:</strong> {card.thoughts}</p>
+                  <p><strong>Эмоции:</strong> {card.emotions}</p>
+                  <p><strong>Поведение:</strong> {card.behavior}</p>
+                  <div style={{ marginTop: 10 }}>
+                    <Link to={`/card/${card.id}`}>
+                      <button
+                        style={{ marginRight: 10 }}
+                        onClick={() => handleOpenCard(card.id)}
+                      >
+                        Открыть
+                      </button>
+                    </Link>
+                    <button
+                      onClick={() => handleDelete(card.id)}
+                      style={{ backgroundColor: '#f44336', color: 'white' }}
+                    >
+                      Удалить
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            );
+          })
         )}
       </div>
 
@@ -256,12 +271,37 @@ const styles = {
     fontWeight: 'bold',
     cursor: 'pointer',
   },
+  cardWrapper: {
+    position: 'relative',
+    overflow: 'hidden',
+    marginBottom: 10,
+  },
+  archiveBackground: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: 120,
+    backgroundColor: '#ffa500',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1,
+  },
+  archiveButton: {
+    background: 'transparent',
+    color: 'white',
+    border: 'none',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+  },
   card: {
     padding: 20,
-    marginBottom: 10,
     borderRadius: 20,
     backgroundColor: 'rgb(51 50 50)',
     color: 'white',
+    zIndex: 2,
+    position: 'relative',
   },
   generateButton: {
     bottom: 20,
