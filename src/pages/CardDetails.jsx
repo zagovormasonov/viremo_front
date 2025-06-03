@@ -62,11 +62,10 @@ const CardDetails = () => {
           <div
             key={index}
             style={{
-              border: "1px solid #ccc",
-              padding: "10px",
+              padding: "20px",
               marginBottom: "10px",
-              borderRadius: "8px",
-              background: "#f9f9f9"
+              borderRadius: "20px",
+              background: "rgb(49 49 49)"
             }}
           >
             <h4>{exercise.title}</h4>
