@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSession } from '@supabase/auth-helpers-react';
 import { supabase } from '../supabase';
 import { Link } from 'react-router-dom';
-import { useSwipeable } from 'react-swipeable';
 
 const Home = () => {
   const session = useSession();
@@ -63,14 +62,14 @@ const Home = () => {
     }
   };
 
-  const handleArchive = async (id) => {
+  const handleArchiveCard = async (id) => {
     const { error } = await supabase
       .from('cards')
       .update({ archived: true })
       .eq('id', id);
 
     if (error) {
-      console.error('Ошибка при архивировании карточки:', error.message);
+      console.error('Ошибка при архивации:', error.message);
     } else {
       fetchCards();
     }
@@ -89,6 +88,7 @@ const Home = () => {
     <div style={styles.container}>
       <h1 style={styles.header}>Сегодня</h1>
 
+      {/* Заголовок + Меню */}
       <div style={styles.headerRow}>
         <h2 style={styles.subheader}>Упражнения</h2>
         <div style={{ position: 'relative' }} ref={menuRef}>
@@ -111,21 +111,19 @@ const Home = () => {
               </div>
               <div
                 style={styles.dropdownItem}
-                onClick={() => alert('Смотреть все')}
+                onClick={() => {
+                  setActiveTab('completed');
+                  setMenuOpen(false);
+                }}
               >
-                Смотреть все
+                Сметреть все
               </div>
             </div>
           )}
         </div>
       </div>
 
-      {editMode && (
-        <p style={{ color: 'orange', marginTop: 10 }}>
-          Свайпните влево, чтобы архивировать карточку
-        </p>
-      )}
-
+      {/* Табы */}
       <div style={styles.tabs}>
         <button
           style={{
@@ -147,44 +145,44 @@ const Home = () => {
         </button>
       </div>
 
+      {/* Карточки */}
       <div style={{ marginTop: 20 }}>
         {filteredCards.length === 0 ? (
           <p style={{ color: 'white' }}>Нет карточек</p>
         ) : (
-          filteredCards.map((card) => {
-            const swipeHandlers = useSwipeable({
-              onSwipedLeft: () => editMode && handleArchive(card.id),
-              preventScrollOnSwipe: true,
-              trackMouse: true,
-            });
-
-            return (
-              <div key={card.id} {...(editMode ? swipeHandlers : {})} style={styles.card}>
-                <p><strong>Ситуация:</strong> {card.situation}</p>
-                <p><strong>Мысли:</strong> {card.thoughts}</p>
-                <p><strong>Эмоции:</strong> {card.emotions}</p>
-                <p><strong>Поведение:</strong> {card.behavior}</p>
-                {!editMode && (
-                  <>
-                    <Link to={`/card/${card.id}`}>
-                      <button
-                        style={{ marginRight: 10 }}
-                        onClick={() => handleOpenCard(card.id)}
-                      >
-                        Открыть
-                      </button>
-                    </Link>
+          filteredCards.map((card) => (
+            <div key={card.id} style={styles.card}>
+              <p><strong>Ситуация:</strong> {card.situation}</p>
+              <p><strong>Мысли:</strong> {card.thoughts}</p>
+              <p><strong>Эмоции:</strong> {card.emotions}</p>
+              <p><strong>Поведение:</strong> {card.behavior}</p>
+              {editMode ? (
+                <button
+                  onClick={() => handleArchiveCard(card.id)}
+                  style={{ backgroundColor: '#ffa500', color: 'white', marginTop: 10 }}
+                >
+                  Архивировать
+                </button>
+              ) : (
+                <div style={{ marginTop: 10 }}>
+                  <Link to={`/card/${card.id}`}>
                     <button
-                      onClick={() => handleDelete(card.id)}
-                      style={{ backgroundColor: '#f44336', color: 'white' }}
+                      style={{ marginRight: 10 }}
+                      onClick={() => handleOpenCard(card.id)}
                     >
-                      Удалить
+                      Открыть
                     </button>
-                  </>
-                )}
-              </div>
-            );
-          })
+                  </Link>
+                  <button
+                    onClick={() => handleDelete(card.id)}
+                    style={{ backgroundColor: '#f44336', color: 'white' }}
+                  >
+                    Удалить
+                  </button>
+                </div>
+              )}
+            </div>
+          ))
         )}
       </div>
 
@@ -203,6 +201,7 @@ const styles = {
     minHeight: '100vh',
     display: 'flex',
     flexDirection: 'column',
+    padding: '0 16px',
   },
   header: {
     fontSize: '28px',
