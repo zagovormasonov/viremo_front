@@ -1,24 +1,24 @@
 import React, { useState } from "react";
 import { supabase } from "./supabase";
+import { Input, Button, Form, Typography, Spin, Alert } from "antd";
+
+const { Title, Text } = Typography;
+const { TextArea } = Input;
 
 const CreateCard = () => {
-  const [situation, setSituation] = useState("");
-  const [thoughts, setThoughts] = useState("");
-  const [emotions, setEmotions] = useState("");
-  const [behavior, setBehavior] = useState("");
+  const [form] = Form.useForm();
   const [exercises, setExercises] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleGenerate = async () => {
+  const handleGenerate = async (values) => {
     setLoading(true);
     setError("");
-
     try {
       const response = await fetch("https://viremos.onrender.com/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ situation, thoughts, emotions, behavior }),
+        body: JSON.stringify(values),
       });
 
       const result = await response.json();
@@ -33,11 +33,12 @@ const CreateCard = () => {
       console.error("Ошибка при запросе:", e);
       setError("Ошибка подключения к серверу");
     }
-
     setLoading(false);
   };
 
   const handleSave = async () => {
+    const values = form.getFieldsValue();
+
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {
@@ -45,16 +46,11 @@ const CreateCard = () => {
       return;
     }
 
-    const { error: insertError } = await supabase.from("cards").insert([
-      {
-        situation,
-        thoughts,
-        emotions,
-        behavior,
-        exercises,
-        user_id: user.id,
-      },
-    ]);
+    const { error: insertError } = await supabase.from("cards").insert([{
+      ...values,
+      exercises,
+      user_id: user.id,
+    }]);
 
     if (insertError) {
       console.error("Ошибка при сохранении карточки:", insertError);
@@ -62,66 +58,56 @@ const CreateCard = () => {
     } else {
       alert("Карточка успешно сохранена!");
       setError("");
+      form.resetFields();
+      setExercises([]);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center items-start p-6">
-      <div className="w-full max-w-3xl bg-white rounded-xl shadow-md p-8">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">Создание новой карточки</h2>
+    <div style={{ maxWidth: 800, margin: "2rem auto", padding: 24, background: "#fff", borderRadius: 8 }}>
+      <Title level={2}>Создание новой карточки</Title>
 
-        <div className="space-y-4">
-          <Input label="Ситуация" value={situation} onChange={setSituation} />
-          <Input label="Мысли" value={thoughts} onChange={setThoughts} />
-          <Input label="Эмоции" value={emotions} onChange={setEmotions} />
-          <Input label="Поведение" value={behavior} onChange={setBehavior} />
+      <Form layout="vertical" form={form} onFinish={handleGenerate}>
+        <Form.Item label="Ситуация" name="situation" rules={[{ required: true, message: "Введите ситуацию" }]}>
+          <TextArea rows={3} />
+        </Form.Item>
+        <Form.Item label="Мысли" name="thoughts" rules={[{ required: true, message: "Введите мысли" }]}>
+          <TextArea rows={3} />
+        </Form.Item>
+        <Form.Item label="Эмоции" name="emotions" rules={[{ required: true, message: "Введите эмоции" }]}>
+          <TextArea rows={3} />
+        </Form.Item>
+        <Form.Item label="Поведение" name="behavior" rules={[{ required: true, message: "Введите поведение" }]}>
+          <TextArea rows={3} />
+        </Form.Item>
+
+        <Form.Item>
+          <Button type="primary" htmlType="submit" loading={loading} block>
+            Сгенерировать упражнения
+          </Button>
+        </Form.Item>
+      </Form>
+
+      {error && <Alert type="error" message={error} style={{ marginBottom: 16 }} />}
+
+      {exercises.length > 0 && (
+        <div style={{ marginTop: 24 }}>
+          <Title level={4}>Сгенерированные упражнения</Title>
+          {exercises.map((ex, i) => (
+            <div key={i} style={{ marginBottom: 16, padding: 16, border: "1px solid #eee", borderRadius: 8 }}>
+              <Text strong>{ex.title}</Text>
+              <p><strong>Время:</strong> {ex.duration}</p>
+              <p>{ex.description}</p>
+              <Text type="secondary">{ex.instructions}</Text>
+            </div>
+          ))}
+          <Button type="primary" onClick={handleSave} block>
+            Сохранить карточку
+          </Button>
         </div>
-
-        <button
-          onClick={handleGenerate}
-          disabled={loading}
-          className="mt-6 w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
-        >
-          {loading ? "Генерация..." : "Сгенерировать упражнения"}
-        </button>
-
-        {exercises.length > 0 && (
-          <div className="mt-8 space-y-4">
-            <h3 className="text-xl font-semibold text-gray-700">Сгенерированные упражнения</h3>
-            {exercises.map((ex, i) => (
-              <div key={i} className="bg-gray-50 p-4 rounded-lg border">
-                <h4 className="font-semibold text-gray-800">{ex.title}</h4>
-                <p className="text-sm text-gray-500 mb-1"><strong>Время:</strong> {ex.duration}</p>
-                <p className="text-gray-700">{ex.description}</p>
-                <p className="text-sm italic text-gray-600 mt-1">{ex.instructions}</p>
-              </div>
-            ))}
-            <button
-              onClick={handleSave}
-              className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition"
-            >
-              Сохранить карточку
-            </button>
-          </div>
-        )}
-
-        {error && <p className="text-red-500 mt-4">{error}</p>}
-      </div>
+      )}
     </div>
   );
 };
-
-const Input = ({ label, value, onChange }) => (
-  <div>
-    <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-    <textarea
-      rows={3}
-      className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      required
-    />
-  </div>
-);
 
 export default CreateCard;
