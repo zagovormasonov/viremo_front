@@ -79,19 +79,19 @@ const CreateCard = () => {
     <div>
       <h2>Создание новой карточки</h2>
       <label>Ситуация:</label>
-      <input value={situation} onChange={(e) => setSituation(e.target.value)} />
+      <input required value={situation} onChange={(e) => setSituation(e.target.value)} />
       <br />
 
       <label>Мысли:</label>
-      <input value={thoughts} onChange={(e) => setThoughts(e.target.value)} />
+      <input required value={thoughts} onChange={(e) => setThoughts(e.target.value)} />
       <br />
 
       <label>Эмоции:</label>
-      <input value={emotions} onChange={(e) => setEmotions(e.target.value)} />
+      <input required value={emotions} onChange={(e) => setEmotions(e.target.value)} />
       <br />
 
       <label>Поведение:</label>
-      <input value={behavior} onChange={(e) => setBehavior(e.target.value)} />
+      <input required value={behavior} onChange={(e) => setBehavior(e.target.value)} />
       <br />
 
       <button onClick={handleGenerate} disabled={loading}>
