@@ -197,7 +197,7 @@ const Home = () => {
       </AnimatePresence>
 
       <Link to="/create">
-        <FloatButton icon={<Plus />} type="primary" style={{ insetInlineEnd: 24 }} />
+        <FloatButton icon={<Plus />} type="default" style={{ insetInlineEnd: 24 }} />
       </Link>
     </div>
   );
