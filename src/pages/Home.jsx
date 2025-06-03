@@ -3,7 +3,8 @@ import { useSession } from '@supabase/auth-helpers-react';
 import { supabase } from '../supabase';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Tabs, Button } from 'antd'; // в начале файла
+import { Tabs, Button, FloatButton  } from 'antd'; // в начале файла
+import { Plus } from 'lucide-react';
 
 const Home = () => {
   const session = useSession();
@@ -149,7 +150,7 @@ const Home = () => {
                   <Link to={`/card/${card.id}`}>
                     <Button
                       color='primary'
-                      variant="filled"
+                      variant="text"
                       onClick={() => handleOpenCard(card.id)}
                     >
                       Открыть
@@ -159,7 +160,7 @@ const Home = () => {
                   {activeTab === 'archived' ? (
                     <Button
                       color='primary'
-                      variant="filled"
+                      variant="text"
                       onClick={() => handleUnarchiveCard(card.id)}
                       
                     >
@@ -168,7 +169,7 @@ const Home = () => {
                   ) : (
                     <Button
                     color='danger'
-                    variant="filled"
+                    variant="text"
                       onClick={() => handleDelete(card.id)}
                     >
                       Удалить
@@ -196,7 +197,7 @@ const Home = () => {
       </AnimatePresence>
 
       <Link to="/create">
-        <Button color='primary' variant="filled">Сгенерировать упражнения</Button>
+        <FloatButton icon={<Plus />} type="primary" style={{ insetInlineEnd: 24 }} />
       </Link>
     </div>
   );
