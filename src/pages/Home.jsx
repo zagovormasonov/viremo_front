@@ -261,6 +261,7 @@ const styles = {
     right: 0,
     top: 0,
     bottom: 0,
+    borderRadius: '20px',
     width: 120,
     backgroundColor: '#ffa500',
     display: 'flex',
