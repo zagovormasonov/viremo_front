@@ -173,6 +173,9 @@ const Home = () => {
       <Link to="/create">
         <button style={styles.generateButton}>Сгенерировать упражнения</button>
       </Link>
+      <Link to="/archived" style={styles.dropdownItem}>
+        Архив
+      </Link>
     </div>
   );
 };

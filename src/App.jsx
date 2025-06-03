@@ -9,6 +9,7 @@ import Mascot from './Mascot';
 import InternetStatusBanner from './InternetStatusBanner';
 import CreateCard from './CreateCard';
 import CardDetails from './pages/CardDetails';
+import ArchivedCards from './pages/ArchivedCards';
 
 function TabBar() {
   const location = useLocation();
@@ -81,6 +82,7 @@ function ClientApp({ user, onSignOut }) {
         <Route path="/settings" element={<Settings />} />
         <Route path="/create" element={<CreateCard />} />
         <Route path="/card/:id" element={<CardDetails />} />
+        <Route path="/archived" element={<ArchivedCards />} />
       </Routes>
       <TabBar />
     </div>
