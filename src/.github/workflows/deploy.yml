@@ -32,4 +32,5 @@ jobs:
           bucket: ${{ secrets.YANDEX_BUCKET_NAME }}
           region: ${{ secrets.YANDEX_REGION }}
           source_dir: './build'
+          destination_dir: '' # 🟢 ВАЖНО: чтобы заливать не внутрь build, а в корень
           endpoint: 'https://storage.yandexcloud.net'
