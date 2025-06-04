@@ -44,6 +44,15 @@ html {
   background-color: #fff !important;
 }
 
+textarea{
+  font-size: 16px !important;
+}
+
+input{
+  font-size: 16px !important;
+}
+
+
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
