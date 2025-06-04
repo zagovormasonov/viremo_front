@@ -49,7 +49,7 @@ const CardDetails = () => {
   if (!card) return <p>Карточка не найдена</p>;
 
   return (
-    <div>
+    <div style={{ padding: "5px" }}>
       <h2>Карточка #{card.id}</h2>
       <p><strong>Ситуация:</strong> {card.situation}</p>
       <p><strong>Мысли:</strong> {card.thoughts}</p>
