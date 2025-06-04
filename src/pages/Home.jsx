@@ -3,7 +3,7 @@ import { useSession } from '@supabase/auth-helpers-react';
 import { supabase } from '../supabase';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Tabs, Button, FloatButton  } from 'antd'; // в начале файла
+import { Tabs, Button, FloatButton } from 'antd';
 import { Plus } from 'lucide-react';
 
 const Home = () => {
@@ -15,7 +15,9 @@ const Home = () => {
   const menuRef = useRef();
 
   useEffect(() => {
-    if (session?.user) fetchCards();
+    if (session && session.user) {
+      fetchCards(activeTab);
+    }
   }, [session, activeTab]);
 
   useEffect(() => {
@@ -28,19 +30,21 @@ const Home = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const fetchCards = async () => {
+  const fetchCards = async (tab) => {
+    if (!session || !session.user) return;
+
     let query = supabase
       .from('cards')
       .select('*')
       .eq('user_id', session.user.id)
       .order('created_at', { ascending: false });
 
-    if (activeTab === 'archived') {
+    if (tab === 'archived') {
       query = query.eq('archived', true);
     } else {
       query = query.eq('archived', false);
-      if (activeTab === 'new') query = query.eq('viewed', false);
-      if (activeTab === 'completed') query = query.eq('viewed', true);
+      if (tab === 'new') query = query.eq('viewed', false);
+      if (tab === 'completed') query = query.eq('viewed', true);
     }
 
     const { data, error } = await query;
@@ -51,7 +55,7 @@ const Home = () => {
   const handleDelete = async (id) => {
     const { error } = await supabase.from('cards').delete().eq('id', id);
     if (error) console.error('Ошибка при удалении карточки:', error.message);
-    else fetchCards();
+    else fetchCards(activeTab);
   };
 
   const handleOpenCard = async (id) => {
@@ -60,7 +64,7 @@ const Home = () => {
       .update({ viewed: true })
       .eq('id', id);
     if (error) console.error('Ошибка при обновлении карточки:', error.message);
-    else fetchCards();
+    else fetchCards(activeTab);
   };
 
   const handleArchiveCard = async (id) => {
@@ -70,7 +74,7 @@ const Home = () => {
       .eq('id', id);
     if (error) console.error('Ошибка при архивации:', error.message);
     else {
-      fetchCards();
+      fetchCards(activeTab);
       setShowArchiveMessage(true);
       setTimeout(() => setShowArchiveMessage(false), 2000);
     }
@@ -82,7 +86,7 @@ const Home = () => {
       .update({ archived: false })
       .eq('id', id);
     if (error) console.error('Ошибка при восстановлении:', error.message);
-    else fetchCards();
+    else fetchCards(activeTab);
   };
 
   if (!session) return <div>Пожалуйста, войдите в аккаунт</div>;
@@ -149,8 +153,7 @@ const Home = () => {
                 <div style={{ marginTop: 10 }}>
                   <Link to={`/card/${card.id}`}>
                     <Button
-                      color='primary'
-                      variant="text"
+                      type="primary"
                       onClick={() => handleOpenCard(card.id)}
                     >
                       Открыть
@@ -159,17 +162,14 @@ const Home = () => {
 
                   {activeTab === 'archived' ? (
                     <Button
-                      color='primary'
-                      variant="text"
+                      type="default"
                       onClick={() => handleUnarchiveCard(card.id)}
-                      
                     >
                       Вернуть
                     </Button>
                   ) : (
                     <Button
-                    color='danger'
-                    variant="text"
+                      danger
                       onClick={() => handleDelete(card.id)}
                     >
                       Удалить
@@ -252,20 +252,6 @@ const styles = {
     cursor: 'pointer',
     borderBottom: '1px solid #444',
   },
-  tabs: {
-    display: 'flex',
-    marginTop: 10,
-    gap: 10,
-  },
-  tabButton: {
-    flex: 1,
-    padding: 10,
-    border: 'none',
-    borderRadius: 10,
-    color: 'white',
-    fontWeight: 'bold',
-    cursor: 'pointer',
-  },
   cardWrapper: {
     position: 'relative',
     overflow: 'hidden',
@@ -296,19 +282,6 @@ const styles = {
     color: 'black',
     zIndex: 2,
     position: 'relative',
-  },
-  generateButton: {
-    bottom: 20,
-    padding: '14px 28px',
-    fontSize: '16px',
-    width: '100%',
-    borderRadius: '12px',
-    backgroundColor: 'rgb(45 124 242)',
-    color: 'white',
-    border: 'none',
-    cursor: 'pointer',
-    zIndex: 1000,
-    marginTop: 20,
   },
   archiveMessage: {
     position: 'fixed',
